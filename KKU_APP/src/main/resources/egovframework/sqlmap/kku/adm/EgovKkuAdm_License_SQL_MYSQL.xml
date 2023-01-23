@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="kkuAdminLicense">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<typeAlias  alias="EgovKkuAppUserVO" type="egovframework.kku.usr.service.EgovKkuAppUserVO"/>
+	
+	<sql id="adminLicenseDAO.searchLicenseListCondition">
+		<!-- <isNotEmpty prepend="AND" property="searchSdate">
+		</isNotEmpty>	
+		<isNotEmpty prepend="AND" property="searchEdate">
+		</isNotEmpty> -->
+		<!-- <isNotEmpty prepend="AND" property="searchCondition">
+		</isNotEmpty> -->
+		<isNotEmpty prepend="AND" property="searchKeyword">
+			(KCS.SUBJECT_NAME LIKE CONCAT('%', #searchKeyword#, '%')
+			OR
+			KCS.SUBJECT_CD LIKE CONCAT('%', #searchKeyword#, '%'))
+		</isNotEmpty>
+	</sql>
+	
+	<select id="adminLicenseDAO.searchLicenseList" resultClass="egovMap">
+		SELECT 
+			KCS.IDX
+			,KCS.QUAL_CD
+			,KCS.QUAL_NAME
+			,KCS.SERIES_CD
+			,KCS.SERIES_NAME
+			,KCS.SUBJECT_CD
+			,KCS.SUBJECT_NAME
+			,KCS.JOBFIELD_CD
+			,KCS.JOBFIELD_NAME
+			,KCS.MJOBFIELD_CD
+			,KCS.MJOBFIELD_NAME
+		FROM
+			KU_CERTIFICATION_SUBJECT KCS
+		WHERE
+			KCS.DEL_YN = 'N'
+		<include refid="adminLicenseDAO.searchLicenseListCondition"/>
+		ORDER BY
+			KCS.QUAL_CD DESC, KCS.SUBJECT_NAME
+		LIMIT 
+			#firstIndex#,#pageUnit#
+	</select>
+	
+	<select id="adminLicenseDAO.searchLicenseListCnt" resultClass="Integer">
+		SELECT COUNT(*)
+		FROM
+			KU_CERTIFICATION_SUBJECT KCS
+		WHERE
+			KCS.DEL_YN = 'N'
+		<include refid="adminLicenseDAO.searchLicenseListCondition"/>
+	</select>
+	
+	<select id="adminLicenseDAO.searchLicenseDetail" resultClass="egovMap">
+		SELECT 
+			KCS.IDX
+			,KCS.QUAL_CD
+			,KCS.QUAL_NAME
+			,KCS.SERIES_CD
+			,KCS.SERIES_NAME
+			,KCS.SUBJECT_CD
+			,KCS.SUBJECT_NAME
+			,KCS.JOBFIELD_CD
+			,KCS.JOBFIELD_NAME
+			,KCS.MJOBFIELD_CD
+			,KCS.MJOBFIELD_NAME
+		FROM
+			KU_CERTIFICATION_SUBJECT KCS
+		WHERE
+			KCS.DEL_YN = 'N'
+		AND
+			KCS.SUBJECT_CD = #subjectCd#
+		LIMIT 1
+	</select>
+	
+	<select id="adminLicenseDAO.searchLicenseSchedule" resultClass="egovMap">
+		SELECT 
+			KCD.IDX
+			,KCD.TEST_YEAR
+			,KCD.TEST_SEQ
+			,KCD.QUAL_CD
+			,KCD.QUAL_NAME
+			,KCD.DESCRIPTION
+			,STR_TO_DATE(KCD.WTEST_APLC_STARTDT,'%Y%m%d') WAS_DATE
+			,STR_TO_DATE(KCD.WTEST_APLC_ENDDT,'%Y%m%d') WAE_DATE
+			,STR_TO_DATE(KCD.WTEST_STARTDT,'%Y%m%d') WS_DATE
+			,STR_TO_DATE(KCD.WTEST_ENDDT,'%Y%m%d') WE_DATE
+			,STR_TO_DATE(KCD.WTEST_PASSDT,'%Y%m%d') WP_DATE
+			,STR_TO_DATE(KCD.PTEST_APLC_STARTDT,'%Y%m%d') PAS_DATE
+			,STR_TO_DATE(KCD.PTEST_APLC_ENDDT,'%Y%m%d') PAE_DATE
+			,STR_TO_DATE(KCD.PTEST_STARTDT,'%Y%m%d') PS_DATE
+			,STR_TO_DATE(KCD.PTEST_ENDDT,'%Y%m%d') PE_DATE
+			,STR_TO_DATE(KCD.PTEST_PASSDT,'%Y%m%d') PP_DATE
+			,KCD.SUBJECT_CD
+			,KCD.REG_ID
+			,KCD.REG_DATE
+			,KCD.MOD_ID
+			,KCD.MOD_DATE
+		FROM
+			KU_CERTIFICATION_DATE KCD
+		WHERE
+			KCD.DEL_YN = 'N'
+		AND
+			KCD.SUBJECT_CD = #subjectCd#
+		ORDER BY
+			KCD.TEST_YEAR, KCD.TEST_SEQ
+	</select>
+	
+	<select id="adminLicenseDAO.searchLicenseRecommandation" resultClass="egovMap">
+		SELECT 
+			KCI.IDX
+			,KCI.INTEREST_CD
+			,(SELECT KCS.SUBJECT_CD FROM KU_CERTIFICATION_SUBJECT KCS WHERE KCS.SUBJECT_NAME = KCI.SUBJECT_NAME) SUBJECT_CD
+			,KCI.SUBJECT_NAME
+			,KCI.REC_REGDT
+			,KCI.REC_SUBJECT_CD_ONE
+			,KCI.REC_SUBJECT_CD_TWO
+			,KCI.REC_SUBJECT_NAME_ONE
+			,KCI.REC_SUBJECT_NAME_TWO
+		FROM
+			KU_CERTIFICATION_INTEREST KCI
+		WHERE
+			KCI.DEL_YN = 'N'
+		AND
+			KCI.SUBJECT_NAME = (SELECT KCS.SUBJECT_NAME FROM KU_CERTIFICATION_SUBJECT KCS WHERE KCS.SUBJECT_CD = #subjectCd#)
+	</select>
+	
+	<select id="adminLicenseDAO.searchLicenseRecoMade" resultClass="egovMap">
+		SELECT
+			KCR.IDX
+			,KCR.SUBJECT_CD
+			,KCR.SUBJECT_NAME
+			,KCR.REC_SUBJECT_CD
+			,KCR.REC_SUBJECT_NAME
+		FROM
+			KU_CERTIFICATION_INTEREST_RECO KCR
+		WHERE
+			KCR.DEL_YN = 'N'
+		AND
+			KCR.SUBJECT_CD = #subjectCd#
+	</select>
+	
+	<select id="adminLicenseDAO.searchLicenseRecCnt" resultClass="Integer">
+		SELECT
+			COUNT(*)
+		FROM
+			KU_CERTIFICATION_INTEREST_RECO KCR
+		WHERE
+			KCR.DEL_YN = 'N'
+		AND
+			KCR.SUBJECT_CD = #subjectCd# 
+		AND 
+			KCR.REC_SUBJECT_CD = #recSubjectCd#
+			
+	</select>
+	
+	<select id="adminLicenseDAO.searchLicenseIRecCnt" resultClass="Integer">
+		SELECT
+			COUNT(*)
+		FROM
+			KU_CERTIFICATION_INTEREST KCI
+		WHERE
+			KCI.DEL_YN = 'N'
+		AND
+			KCI.SUBJECT_NAME = (SELECT KCS.SUBJECT_NAME FROM KU_CERTIFICATION_SUBJECT KCS WHERE KCS.SUBJECT_CD = #subjectCd#)
+		AND 
+			(KCI.REC_SUBJECT_CD_ONE = #recSubjectCd#
+			OR
+			KCI.REC_SUBJECT_CD_TWO = #recSubjectCd#)
+			
+	</select>
+	
+	<select id="adminLicenseDAO.searchLicenseQuestions" resultClass="egovMap">
+		SELECT 
+			KCQ.IDX
+			,KCQ.QUES_IDX
+			,KCQ.QUES_TITLE
+			,KCQ.QUES_CONTENTS
+			,KCQ.QUAL_CD
+			,KCQ.QUAL_NAME
+			,KCQ.SERIES_CD
+			,KCQ.SERIES_NAME
+			,KCQ.QUES_FILE_NAME
+			,KCQ.QUES_FILE_NAME
+			,KCQ.QUES_FILE_URL
+			,KCQ.SUBJECT_CD
+			,KCQ.SUBJECT_NAME
+		FROM
+			KU_CERTIFICATION_QUESTION KCQ
+		WHERE
+			KCQ.DEL_YN = 'N'
+		AND
+			KCQ.SUBJECT_CD = #subjectCd#
+		<isNotEmpty prepend="AND" property="idx">
+			KCQ.IDX = #idx#
+		</isNotEmpty>
+	</select>
+	
+	<select id="adminLicenseDAO.searchMajorRecommandation" resultClass="egovMap">
+		SELECT 
+			KCU.IDX
+			,KCU.UNI_IDX
+			,(SELECT KU.UNI_DEPARTMENT FROM KU_UNI KU WHERE KU.IDX = KCU.UNI_IDX) UNI_DEPARTMENT
+			,(SELECT KU.UNI_MAJOR FROM KU_UNI KU WHERE KU.IDX = KCU.UNI_IDX) UNI_MAJOR
+			,KCU.SUBJECT_CD
+			,KCU.SUBJECT_NAME
+			,CASE 
+			WHEN KCU.PILSOO_YN = 'Y' THEN '필수추천'
+			ELSE '일반추천'
+			END PILSOO
+		FROM
+			KU_CERTIFICATION_UNI_RECO KCU
+		WHERE
+			KCU.DEL_YN = 'N'
+		AND
+			KCU.SUBJECT_CD = #subjectCd#
+		<isNotEmpty prepend="AND" property="uniIdx">
+			KCU.UNI_IDX = #uniIdx#
+		</isNotEmpty>
+		ORDER BY 
+		CASE 
+			WHEN KCU.PILSOO_YN = 'Y' THEN 1
+			ELSE 2
+			END, KCU.MOD_DATE, KCU.REG_DATE
+	</select>
+	
+	<insert id="adminLicenseDAO.insertLicenseRec">
+		INSERT INTO KU_CERTIFICATION_INTEREST_RECO (
+			SUBJECT_CD
+			,SUBJECT_NAME
+			,REC_SUBJECT_CD
+			,REC_SUBJECT_NAME
+			,REG_ID
+			,REG_DATE
+			,DEL_YN
+		) VALUES (
+		   #subjectCd#
+		   ,(SELECT KCS.SUBJECT_NAME FROM KU_CERTIFICATION_SUBJECT KCS WHERE KCS.SUBJECT_CD = #subjectCd#)
+		   ,#recSubjectCd#
+		   ,#recSubjectName#
+		   ,#regId#
+		   ,NOW()
+		   ,'N'
+		)
+	</insert>
+	
+	<insert id="adminLicenseDAO.insertRecMajor">
+		INSERT INTO KU_CERTIFICATION_UNI_RECO (
+			UNI_IDX
+		    ,SUBJECT_CD
+		    ,SUBJECT_NAME
+		    ,REG_ID
+		    ,REG_DATE
+		    ,PILSOO_YN
+		) VALUES (
+		   #uniIdx#
+		   ,#subjectCd#
+		   ,(SELECT KCS.SUBJECT_NAME FROM KU_CERTIFICATION_SUBJECT KCS WHERE KCS.SUBJECT_CD = #subjectCd#)
+		   ,#regId#
+		   ,NOW()
+		   ,#pilsooYn#
+		)
+	</insert>
+	
+	<update id="adminLicenseDAO.updateRecMajor">
+		UPDATE KU_CERTIFICATION_UNI_RECO SET
+			UNI_IDX = #uniIdx#
+			,PILSOO_YN = #pilsooYn#
+			,MOD_ID = #regId#
+			,MOD_DATE = NOW()
+		WHERE IDX = #idx#
+	</update>
+	
+	<delete id="adminLicenseDAO.deleteRecMajor">
+		DELETE FROM KU_CERTIFICATION_UNI_RECO
+		WHERE IDX = #idx#;
+	</delete>
+	
+	<update id="adminLicenseDAO.deleteRecLicense">
+		UPDATE KU_CERTIFICATION_INTEREST_RECO SET 
+			DEL_YN = 'Y'
+		WHERE IDX = #idx#;
+	</update>
+	
+	<insert id="adminLicenseDAO.insertPrevQuestions">
+		INSERT KU_CERTIFICATION_QUESTION (
+			QUES_TITLE
+			,QUAL_CD
+			,QUAL_NAME
+			,SERIES_CD
+			,SERIES_NAME
+			,SUBJECT_CD
+			,SUBJECT_NAME
+			,QUES_FILE_NAME
+			,QUES_FILE_ORDER
+			,QUES_FILE_URL
+			,REG_ID
+			,REG_DATE
+			,DEL_YN
+		) VALUES (
+			#quesTitle#
+			,(SELECT QUAL_CD FROM KU_CERTIFICATION_SUBJECT WHERE SUBJECT_CD = #subjectCd#)
+			,(SELECT QUAL_NAME FROM KU_CERTIFICATION_SUBJECT WHERE SUBJECT_CD = #subjectCd#)
+			,(SELECT SERIES_CD FROM KU_CERTIFICATION_SUBJECT WHERE SUBJECT_CD = #subjectCd#)
+			,(SELECT SERIES_NAME FROM KU_CERTIFICATION_SUBJECT WHERE SUBJECT_CD = #subjectCd#)
+			,#subjectCd#
+			,(SELECT SUBJECT_NAME FROM KU_CERTIFICATION_SUBJECT WHERE SUBJECT_CD = #subjectCd#)
+			,#quesFileName#
+			,#quesFileOrder#
+			,#quesFileUrl#
+			,#regId#
+			,NOW()
+			,'N'
+		)
+		<selectKey keyProperty="idx" resultClass="String">
+	        SELECT LAST_INSERT_ID()
+	    </selectKey>
+	</insert>
+	
+	<update id="adminLicenseDAO.updatePrevQuestions">
+		UPDATE KU_CERTIFICATION_QUESTION SET
+			QUES_TITLE = #quesTitle#
+			,QUES_FILE_NAME =  COALESCE(#quesFileName#,QUES_FILE_NAME)
+			,QUES_FILE_URL = COALESCE(#quesFileUrl#,QUES_FILE_URL)
+			,MOD_ID = #regId#
+			,MOD_DATE = NOW()
+		WHERE IDX = #idx#
+	</update>
+	
+	<update id="adminLicenseDAO.deleteQuestions">
+		UPDATE KU_CERTIFICATION_QUESTION SET
+			DEL_YN = 'Y'
+			,MOD_ID = #regId#
+			,MOD_DATE = NOW() 
+		WHERE IDX = #idx#
+	</update>
+	
+	<update id="adminLicenseDAO.updateLicenseSchedule">
+		UPDATE KU_CERTIFICATION_DATE SET 
+			DESCRIPTION = #description#
+			,MOD_ID = #regId#
+			,MOD_DATE = NOW()
+		WHERE IDX = #idx#;
+	</update>
+	
+	<select id="adminLicenseDAO.searchLicenseBoard" resultClass="egovMap">
+		
+		<![CDATA[
+			SELECT 
+				*
+		FROM 
+			KU_CERTIFICATION_BOARD
+		WHERE
+			SUBJECT_CD = #subjectCd#
+		]]>
+		<isNotEmpty prepend="AND" property="subjectName">
+			<![CDATA[ SUBJECT_NAME = #subjectName# ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="searchSdate">
+			<![CDATA[ BOARD_WRITEDATE >= #searchSdate# ]]>
+		</isNotEmpty>	
+		<isNotEmpty prepend="AND" property="searchEdate">
+			<![CDATA[ BOARD_WRITEDATE <= #searchEdate# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="title">
+				BOARD_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="content">
+				BOARD_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="name">
+				BOARD_WRITER LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>			
+			<isEqual prepend="AND" property="searchCondition" compareValue="ALL">
+				(BOARD_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				BOARD_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				BOARD_WRITER LIKE  CONCAT('%', #searchKeyword# , '%'))
+			</isEqual>
+		</isNotEmpty>
+		limit #firstIndex#, #pageUnit#
+		
+	</select>  
+	
+  <select id="adminLicenseDAO.licenseBoardDetail" resultClass="egovMap">
+  	SELECT
+  		*
+  	FROM
+  		KU_CERTIFICATION_BOARD
+  	WHERE
+  		BOARD_IDX = #boardIdx#
+  </select>	
+  
+  
+  <update id="adminLicenseDAO.updatelicenseBoard">
+	  UPDATE
+	  	KU_CERTIFICATION_BOARD
+	  <dynamic prepend="SET">
+	  		<isNotEmpty prepend="," property="boardTitle">
+		  		BOARD_TITLE = #boardTitle#
+			</isNotEmpty>
+	  		<isNotEmpty prepend="," property="boardWriter">
+		  		BOARD_WRITER = #boardWriter#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="boardWriter">
+		  		BOARD_WRITEDATE = #boardWritedate#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="boardWriter">
+		  		BOARD_CONTENT = #boardContent#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="delYn">
+		  		DEL_YN = #delYn#
+			</isNotEmpty>
+	  </dynamic>
+	  WHERE
+	  	BOARD_IDX = #boardIdx#
+  
+  </update> 	
+  
+	
+	<insert id="adminLicenseDAO.insertDataLicnese">
+		INSERT INTO KU_CERTIFICATION_DATE(
+			QUAL_NAME,
+			DESCRIPTION,
+			WTEST_APLC_STARTDT,
+			WTEST_APLC_ENDDT,
+			WTEST_STARTDT,
+			WTEST_PASSDT,
+			PTEST_APLC_STARTDT,
+			PTEST_APLC_ENDDT,
+			PTEST_STARTDT,
+			PTEST_PASSDT,
+			SUBJECT_CD
+		) VALUES (
+			#qualName#,
+			#description#,
+			#wtestAplcStartdt#,
+			#wtestAplcEnddt#,
+			#wtestStartdt#,
+			#wtestPassdt#,
+			#ptestAplcStartdt#,
+			#ptestAplcEnddt#,
+			#ptestStartdt#,
+			#ptestPassdt#,
+			#subjectCd#
+		)
+	</insert>	
+	
+	<insert id="adminLicenseDAO.insertLicenseCustom">
+		<![CDATA[
+			INSERT INTO KU_CERTIFICATION_SUBJECT(
+				SUBJECT_NAME,
+				SUBJECT_CD,
+				QUAL_CD,
+				QUAL_NAME,
+				JOBFIELD_NAME,
+				MJOBFIELD_NAME,
+				SERIES_NAME
+			) VALUES (
+				#subjectName#,
+				#subjectCd#,
+				#qualCd#,
+				#qualName#,				
+				#jobfieldName#,
+				#mjobfieldName#,
+				#seriesName#
+			)
+		]]>
+	</insert>	
+	
+	<update id="adminLicenseDAO.updateLicenseCustom">
+			UPDATE KU_CERTIFICATION_SUBJECT SET 
+				SUBJECT_NAME = #subjectName# ,
+				QUAL_CD = #qualCd# ,
+				SERIES_NAME = #seriesName# ,
+				JOBFIELD_NAME = #jobfieldName# ,
+				MJOBFIELD_NAME = #mjobfieldName#
+			WHERE 
+				IDX = #idx#
+	</update>	
+
+	
+	<select id="adminLicenseDAO.selectRecentNumber" resultClass="egovMap">
+	  	SELECT
+	  		SUBJECT_CD
+	  	FROM
+	  		KU_CERTIFICATION_SUBJECT
+	  	WHERE SUBJECT_CD LIKE 'C%'
+	  	ORDER BY SUBJECT_CD DESC
+	  	LIMIT 1
+	  </select>	
+	  
+</sqlMap>

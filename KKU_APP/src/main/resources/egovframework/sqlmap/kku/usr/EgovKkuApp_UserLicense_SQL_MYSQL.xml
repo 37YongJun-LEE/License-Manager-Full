@@ -1,0 +1,695 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="licenseDAO">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<typeAlias  alias="EgovKkuAppUserVO" type="egovframework.kku.usr.service.EgovKkuAppUserVO"/>
+	<typeAlias  alias="EgovKkuAppLicenseVO" type="egovframework.kku.usr.service.EgovKkuAppLicenseVO"/>
+	
+	
+	<sql id="licenseDAO.selectLicenseFilesCondition">
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="All">
+				(
+				QUES_TITLE LIKE CONCAT('%',#searchKeyword#,'%')
+			OR
+				QUES_CONTENTS LIKE CONCAT('%',#searchKeyword#,'%')
+				)
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="quesTitle">
+				QUES_TITLE LIKE CONCAT('%',#searchKeyword#,'%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="quesContents">
+				QUES_CONTENTS LIKE CONCAT('%',#searchKeyword#,'%')
+			</isEqual>
+		</isNotEmpty>
+	</sql>
+	
+	<sql id="licenseDAO.selectLicenseBoardListCondition">
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="All">
+				(
+				BOARD_TITLE LIKE CONCAT('%',#searchKeyword#,'%')
+			OR
+				BOARD_CONTENT LIKE CONCAT('%',#searchKeyword#,'%')
+			OR
+				BOARD_WRITER LIKE CONCAT('%',#searchKeyword#,'%')
+				)
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="boardTitle">
+				BOARD_TITLE LIKE CONCAT('%',#searchKeyword#,'%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="boardContent">
+				BOARD_CONTENT LIKE CONCAT('%',#searchKeyword#,'%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="boardWriter">
+				BOARD_WRITER LIKE CONCAT('%',#searchKeyword#,'%')
+			</isEqual>
+		</isNotEmpty>
+	</sql>
+	
+	
+	<select id = "licenseDAO.selectLicenseList" resultClass="egovMap">
+		SELECT 
+			*
+		FROM 
+			KU_CERTIFICATION_DATE 
+		where 
+			SUBJECT_CD = '1320'
+	</select>
+	
+	<select id = "licenseDAO.selectLicenseDateList" resultClass="egovMap">
+		SELECT 
+			SUBJECT_CD,
+			TEST_YEAR,
+			TEST_SEQ,
+			QUAL_CD,
+			QUAL_NAME,
+			DESCRIPTION ,
+			STR_TO_DATE(KU_CERTIFICATION_DATE.WTEST_APLC_STARTDT, '%Y%m%d') as WTEST_APLC_STARTDT,
+			STR_TO_DATE(KU_CERTIFICATION_DATE.WTEST_APLC_ENDDT, '%Y%m%d') as WTEST_APLC_ENDDT,
+			STR_TO_DATE(KU_CERTIFICATION_DATE.WTEST_STARTDT, '%Y%m%d') as WTEST_STARTDT,
+			STR_TO_DATE(KU_CERTIFICATION_DATE.WTEST_ENDDT, '%Y%m%d') as WTEST_ENDDT,
+			STR_TO_DATE(KU_CERTIFICATION_DATE.WTEST_PASSDT, '%Y%m%d') as WTEST_PASSDT,
+			STR_TO_DATE(KU_CERTIFICATION_DATE.PTEST_APLC_STARTDT, '%Y%m%d') as PTEST_APLC_STARTDT,
+			STR_TO_DATE(KU_CERTIFICATION_DATE.PTEST_APLC_ENDDT, '%Y%m%d') as PTEST_APLC_ENDDT,
+			STR_TO_DATE(KU_CERTIFICATION_DATE.PTEST_STARTDT, '%Y%m%d') as PTEST_STARTDT,
+			STR_TO_DATE(KU_CERTIFICATION_DATE.PTEST_ENDDT, '%Y%m%d') as PTEST_ENDDT,
+			STR_TO_DATE(KU_CERTIFICATION_DATE.PTEST_PASSDT, '%Y%m%d') as PTEST_PASSDT,
+			(WTEST_ENDDT >= now()) as DISPLAY_W,
+			(PTEST_ENDDT >= now()) as DISPLAY_P,
+			(WTEST_APLC_ENDDT >= now()) as WAPLC_END,
+			(PTEST_APLC_ENDDT >= now()) as PAPLC_END
+			
+		
+			
+		FROM 
+			KU_CERTIFICATION_DATE
+			
+		WHERE 
+			SUBJECT_CD = #subjectCd# 
+				AND
+					(
+						(WTEST_APLC_ENDDT >= now() OR PTEST_APLC_ENDDT >= now()) 
+					OR  
+						(WTEST_ENDDT >= now() OR PTEST_ENDDT >= now())
+					)
+				
+		ORDER BY 
+			WTEST_APLC_STARTDT ASC
+		<isEqual property="isLimit" compareValue="1">
+		limit 2
+		</isEqual>
+		<isNotEqual property="isLimit" compareValue="1">
+		limit #firstIndex#,#pageUnit#
+		</isNotEqual>
+	
+	</select>
+	
+	<select id="licenseDAO.selectLicenseSubject" resultClass="egovMap">
+		SELECT 
+			*
+		FROM 
+			KU_CERTIFICATION_SUBJECT 
+		WHERE  
+			SUBJECT_CD = #subjectCd#
+	</select>
+	
+	<select id="licenseDAO.selectLicenseInterest" resultClass="egovMap">
+		SELECT 
+			SUBJECT_NAME,
+			REC_SUBJECT_NAME_ONE,
+			REC_SUBJECT_NAME_TWO
+			
+		FROM 
+			KU_CERTIFICATION_INTEREST
+		WHERE 
+			INTEREST_CD = #subjectCd#
+	</select>
+	
+	<select id="licenseDAO.selectLicenseInterestSub" resultClass="egovMap">
+		SELECT 
+			SUBJECT_NAME,
+            SUBJECT_CD,
+		           (SELECT 
+						count(SUBJECT_CD)
+					FROM  
+						KU_CERTIFICATION_SINTEREST kcs 
+					WHERE 
+						REG_ID  = (SELECT USR_EMAIL FROM KU_USER WHERE USR_IDX = #usrIdx#) and not SUBJECT_CD = "" 
+						and SUBJECT_CD in 
+						(SELECT 
+							SUBJECT_CD
+						FROM 
+							KU_CERTIFICATION_SUBJECT 
+						WHERE 
+							SUBJECT_NAME = ku.SUBJECT_NAME)) as CNT
+		FROM 
+				KU_CERTIFICATION_SUBJECT ku
+		WHERE
+			SUBJECT_NAME = #recSubjectNameOne# OR SUBJECT_NAME = #recSubjectNameTwo#
+		<isEqual property="isLimit" compareValue="1">
+		limit 2
+		</isEqual>
+		
+	</select>
+	
+	<select id="licenseDAO.selectInterestCnt" resultClass="java.lang.Integer">
+		SELECT 
+			COUNT(SUBJECT_NAME) 
+		FROM 
+			KU_CERTIFICATION_INTEREST
+		WHERE 
+			INTEREST_CD = #subjectCd#
+		<isEqual property="isLimit" compareValue="1">
+		limit 2
+		</isEqual>
+		
+		
+	</select>
+
+	<select id="licenseDAO.selectAllLicenseData" resultClass="egovMap">
+SELECT *
+FROM (
+    SELECT
+        D.SUBJECT_CD,
+        S.SUBJECT_NAME as NAME,
+        D.DESCRIPTION as DESCRIPTION,
+
+        IF(D.PTEST_APLC_STARTDT = '', '', STR_TO_DATE(D.PTEST_APLC_STARTDT, "%Y%m%d")) as PTEST_APLC_STARTDT,
+        IF(D.PTEST_APLC_ENDDT = '', '', STR_TO_DATE(D.PTEST_APLC_ENDDT, "%Y%m%d")) as PTEST_APLC_ENDDT,
+        IF(D.PTEST_STARTDT = '', '', STR_TO_DATE(D.PTEST_STARTDT, "%Y%m%d")) as PTEST_STARTDT,
+        IF(D.PTEST_ENDDT = '', '', STR_TO_DATE(D.PTEST_ENDDT, "%Y%m%d")) as PTEST_ENDDT,
+
+        IF(D.WTEST_APLC_STARTDT = '', '', STR_TO_DATE(D.WTEST_APLC_STARTDT, "%Y%m%d")) as WTEST_APLC_STARTDT,
+        IF(D.WTEST_APLC_ENDDT = '', '', STR_TO_DATE(D.WTEST_APLC_ENDDT, "%Y%m%d")) as WTEST_APLC_ENDDT,
+        IF(D.WTEST_STARTDT = '', '', STR_TO_DATE(D.WTEST_STARTDT, "%Y%m%d")) as WTEST_STARTDT,
+        IF(D.WTEST_ENDDT = '', '', STR_TO_DATE(D.WTEST_ENDDT, "%Y%m%d")) as WTEST_ENDDT,
+        
+        IF(WTEST_ENDDT = '', false, WTEST_ENDDT > now()) as DISPLAYW,
+        <![CDATA[
+        IF(PTEST_ENDDT = '', true, PTEST_ENDDT < now()) AS PASSED
+        ]]>
+
+		<isNotEmpty property="usrIdx" prepend=",">        
+        I.ALERT_YN
+        </isNotEmpty>
+        <isEmpty property="usrIdx" prepend=",">        
+        'N' AS ALERT_YN
+        </isEmpty>
+    FROM
+        KU_CERTIFICATION_DATE AS D
+    <isNotEmpty property="usrIdx">
+    INNER JOIN KU_CERTIFICATION_SINTEREST I ON D.SUBJECT_CD = I.SUBJECT_CD
+    INNER JOIN KU_USER U ON U.USR_IDX = I.USER_IDX
+    </isNotEmpty>   
+    INNER JOIN KU_CERTIFICATION_SUBJECT S ON D.SUBJECT_CD = S.SUBJECT_CD
+    WHERE
+    	D.DEL_YN='N'
+    	<isNotEmpty property="usrIdx" prepend="AND">
+    	U.USR_IDX=#usrIdx# AND I.DEL_YN='N'
+    	</isNotEmpty> 
+    	<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="licenseTitle">
+				S.SUBJECT_NAME LIKE CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="All">
+				(S.SUBJECT_NAME LIKE CONCAT('%',#searchKeyword#, '%'))
+			</isEqual>
+		</isNotEmpty>
+    ORDER BY D.PTEST_ENDDT DESC
+) T
+GROUP BY T.SUBJECT_CD
+LIMIT 
+	#firstIndex#, #pageUnit#
+	</select>
+	
+	<select id="licenseDAO.selectAllDate" resultClass="egovMap">
+SELECT
+    D.SUBJECT_CD,
+    S.SUBJECT_NAME as NAME,
+    D.DESCRIPTION as DESCRIPTION,
+
+    STR_TO_DATE(D.WTEST_APLC_STARTDT, "%Y%m%d")	as WTEST_APLC_STARTDT,
+    STR_TO_DATE(D.WTEST_APLC_ENDDT, "%Y%m%d") 	as WTEST_APLC_ENDDT,
+    STR_TO_DATE(D.WTEST_STARTDT, "%Y%m%d") 		as WTEST_STARTDT,
+    STR_TO_DATE(D.WTEST_ENDDT, "%Y%m%d") 		as WTEST_ENDDT,
+
+    STR_TO_DATE(D.PTEST_APLC_STARTDT, "%Y%m%d") as PTEST_APLC_STARTDT,
+    STR_TO_DATE(D.PTEST_APLC_ENDDT, "%Y%m%d") 	as PTEST_APLC_ENDDT,
+    STR_TO_DATE(D.PTEST_STARTDT, "%Y%m%d") 		as PTEST_STARTDT,
+    STR_TO_DATE(D.PTEST_ENDDT, "%Y%m%d") 		as PTEST_ENDDT,
+
+    if((WTEST_ENDDT > now()), 'true', 'false') 	as DISPLAYW
+FROM
+    KU_CERTIFICATION_DATE AS D
+INNER JOIN KU_CERTIFICATION_SUBJECT S ON D.SUBJECT_CD = S.SUBJECT_CD
+WHERE D.DEL_YN='N' AND D.SUBJECT_CD = #subjectCd# AND (WTEST_ENDDT >= now() OR PTEST_ENDDT >= now())
+ORDER BY D.PTEST_ENDDT DESC
+	</select>
+	
+	<select id="licenseDAO.getAlertState" resultClass="java.lang.String">
+SELECT ALERT_YN
+  FROM KU_CERTIFICATION_SINTEREST
+ WHERE USER_IDX=#usrIdx# AND SUBJECT_CD=#subjectCd#
+	</select>
+	
+	<update id="licenseDAO.toggleAlert">
+UPDATE KU_CERTIFICATION_SINTEREST
+   SET ALERT_YN = IF(ALERT_YN = "Y", "N", "Y")
+ WHERE USER_IDX=#usrIdx# AND SUBJECT_CD=#subjectCd#
+	</update>
+	
+	<select id="licenseDAO.hasSInterest" resultClass="java.lang.String">
+SELECT 
+    IF (COUNT(*) > 0, 'Y', 'N') AS HAS
+FROM
+    KU_CERTIFICATION_SINTEREST S
+WHERE
+    USER_IDX=#usrIdx# AND SUBJECT_CD=#subjectCd# AND DEL_YN='N'
+    </select>
+	
+	<insert id="licenseDAO.insertSInterest">
+INSERT INTO KU_CERTIFICATION_SINTEREST(USER_IDX, SUBJECT_CD, ALERT_YN, REG_ID, REG_DATE)
+SELECT #usrIdx#, #subjectCd#, 'N', (SELECT USR_NAME FROM KU_USER WHERE USR_IDX=25), now()
+FROM dual
+WHERE NOT EXISTS (SELECT * FROM KU_CERTIFICATION_SINTEREST WHERE USER_IDX=#usrIdx# AND SUBJECT_CD=#subjectCd#)
+	</insert>
+	
+	<update id="licenseDAO.reviveSInterest">
+UPDATE KU_CERTIFICATION_SINTEREST
+SET DEL_YN = 'N'
+WHERE SUBJECT_CD = #subjectCd# AND USER_IDX = #usrIdx#
+	</update>
+	
+	<update id="licenseDAO.deleteSInterest">
+UPDATE KU_CERTIFICATION_SINTEREST
+SET DEL_YN = 'Y'
+WHERE SUBJECT_CD = #subjectCd# AND USER_IDX = #usrIdx#
+	</update>
+	
+	<select id="licenseDAO.selectLicenseListCnt" resultClass="java.lang.Integer">
+SELECT COUNT(DISTINCT T.SUBJECT_CD)
+FROM (
+    SELECT
+        D.SUBJECT_CD,
+        S.SUBJECT_NAME as NAME,
+        D.DESCRIPTION as DESCRIPTION,
+
+        IF(D.PTEST_APLC_STARTDT = '', '', STR_TO_DATE(D.PTEST_APLC_STARTDT, "%Y%m%d")) as PTEST_APLC_STARTDT,
+        IF(D.PTEST_APLC_ENDDT = '', '', STR_TO_DATE(D.PTEST_APLC_ENDDT, "%Y%m%d")) as PTEST_APLC_ENDDT,
+        IF(D.PTEST_STARTDT = '', '', STR_TO_DATE(D.PTEST_STARTDT, "%Y%m%d")) as PTEST_STARTDT,
+        IF(D.PTEST_ENDDT = '', '', STR_TO_DATE(D.PTEST_ENDDT, "%Y%m%d")) as PTEST_ENDDT,
+
+        IF(D.WTEST_APLC_STARTDT = '', '', STR_TO_DATE(D.WTEST_APLC_STARTDT, "%Y%m%d")) as WTEST_APLC_STARTDT,
+        IF(D.WTEST_APLC_ENDDT = '', '', STR_TO_DATE(D.WTEST_APLC_ENDDT, "%Y%m%d")) as WTEST_APLC_ENDDT,
+        IF(D.WTEST_STARTDT = '', '', STR_TO_DATE(D.WTEST_STARTDT, "%Y%m%d")) as WTEST_STARTDT,
+        IF(D.WTEST_ENDDT = '', '', STR_TO_DATE(D.WTEST_ENDDT, "%Y%m%d")) as WTEST_ENDDT,
+        
+        IF(WTEST_ENDDT = '', false, WTEST_ENDDT > now()) as DISPLAYW,
+        <![CDATA[
+        IF(PTEST_ENDDT = '', true, PTEST_ENDDT < now()) AS PASSED
+        ]]>
+
+		<isNotEmpty property="usrIdx" prepend=",">        
+        I.ALERT_YN
+        </isNotEmpty>
+        <isEmpty property="usrIdx" prepend=",">        
+        'N' AS ALERT_YN
+        </isEmpty>
+    FROM
+        KU_CERTIFICATION_DATE AS D
+    <isNotEmpty property="usrIdx">
+    INNER JOIN KU_CERTIFICATION_SINTEREST I ON D.SUBJECT_CD = I.SUBJECT_CD
+    INNER JOIN KU_USER U ON U.USR_IDX = I.USER_IDX
+    </isNotEmpty>   
+    INNER JOIN KU_CERTIFICATION_SUBJECT S ON D.SUBJECT_CD = S.SUBJECT_CD
+    WHERE
+    	D.DEL_YN='N'
+    	<isNotEmpty property="usrIdx" prepend="AND">
+    	U.USR_IDX=#usrIdx# AND I.DEL_YN='N'
+    	</isNotEmpty> 
+    	<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="licenseTitle">
+				S.SUBJECT_NAME LIKE CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="All">
+				(S.SUBJECT_NAME LIKE CONCAT('%',#searchKeyword#, '%'))
+			</isEqual>
+		</isNotEmpty>
+    ORDER BY D.PTEST_ENDDT DESC
+) T
+	</select>
+	
+	<select id="licenseDAO.selectUniReco" resultClass="egovMap">
+SELECT 
+    SUBJECT_CD,
+    SUBJECT_NAME as NAME
+FROM
+    KU_CERTIFICATION_UNI_RECO UR
+INNER JOIN KU_USER USR ON USR.USR_IDX = #usrIdx#
+INNER JOIN KU_UNI U on U.UNI_MAJOR = USR.USR_MAJOR
+WHERE UR.UNI_IDX = U.idx
+	</select>
+	
+	<select id="licenseDAO.selectLicenseFiles" resultClass="egovMap">
+	
+		SELECT 
+			distinct(ques_idx),
+			
+			QUES_TITLE,
+			QUES_CONTENTS,
+			SUBJECT_NAME,
+			SUBJECT_CD,
+			STR_TO_DATE(QUES_REGDT, "%Y%m%d") as QUE_REGDT  
+		FROM 
+			KU_CERTIFICATION_QUESTION
+		WHERE  
+			SUBJECT_CD  = #subjectCd#
+		<include refid="licenseDAO.selectLicenseFilesCondition"/>
+		order by 
+			QUE_REGDT DESC
+		<isEqual property="isLimit" compareValue="1">
+		limit 2
+		</isEqual>
+		<isNotEqual property="isLimit" compareValue="1">
+		limit #firstIndex#,#pageUnit#
+		</isNotEqual>
+		
+	
+	</select>
+	
+	<select id="licenseDAO.selectFileDetail" resultClass="egovMap">
+		SELECT 
+			distinct(ques_idx),
+			
+			QUES_TITLE,
+			QUES_CONTENTS,
+			SUBJECT_NAME,
+			SUBJECT_CD,
+			
+			
+			STR_TO_DATE(QUES_REGDT, "%Y%m%d") as QUE_REGDT   
+		FROM 
+			KU_CERTIFICATION_QUESTION
+		WHERE 
+			QUES_IDX  =  #quesIdx#
+		
+			
+	</select>
+	<select id="licenseDAO.selectFileDetailForDown" resultClass="egovMap">
+		SELECT 
+			distinct(ques_idx),
+			
+			QUES_TITLE,
+			QUES_CONTENTS,
+			SUBJECT_NAME,
+			SUBJECT_CD,
+			
+			QUES_FILE_NAME,
+			QUES_FILE_ORDER,
+			 
+			
+			STR_TO_DATE(QUES_REGDT, "%Y%m%d") as QUE_REGDT   
+		FROM 
+			KU_CERTIFICATION_QUESTION
+		WHERE 
+			QUES_IDX  =  #quesIdx#
+		
+			AND QUES_FILE_ORDER = #quesFileOrder#
+		
+			
+	</select>
+	<select id="licenseDAO.selectFileDetailList" resultClass="egovMap">
+		SELECT 
+			*,
+			STR_TO_DATE(QUES_REGDT, "%Y%m%d") as QUE_REGDT   
+		FROM 
+			KU_CERTIFICATION_QUESTION
+		WHERE 
+			QUES_IDX  = #quesIdx#
+			
+	</select>
+	<select id="licenseDAO.selectFilesListCnt" resultClass="java.lang.Integer">
+		SELECT 
+			count(distinct ques_idx)
+		from 
+			KU_CERTIFICATION_QUESTION 
+		where 
+			SUBJECT_CD = #subjectCd#
+		<include refid="licenseDAO.selectLicenseFilesCondition"/>
+		
+	</select>
+	
+	<select id="licenseDAO.selectBoardList" resultClass="egovMap">
+		SELECT 
+			*,
+			(SELECT FILE_SRV_FILE FROM KU_FILE WHERE FILE_TBL_IDX = kcb.BOARD_IDX AND FILE_DEL_YN = "N" AND FILE_TBL_CODE  = 10 ORDER BY FILE_IDX ASC LIMIT 1) AS FIRST,
+			DATE_FORMAT(kcb.BOARD_WRITEDATE,"%y.%m.%d") as BOARD_CWRITEDATE,
+			(SELECT
+				COUNT(*)
+			FROM
+				KU_REPLY
+			WHERE
+				BOARD_IDX = kcb.BOARD_IDX AND BOARD_NAME = #subjectCd# 
+			) as REPLY_NUM,
+			(
+			SELECT 
+				COUNT(*)
+			FROM
+				KU_BOARDLIKE
+			WHERE 
+				BOARD_IDX = kcb.BOARD_IDX and BOARD_NAME = #subjectCd#
+			) as BOARD_LIKE
+			
+		from 
+			KU_CERTIFICATION_BOARD kcb
+			
+		WHERE
+			SUBJECT_CD  = #subjectCd#
+		AND
+			DEL_YN = 'N'
+		<include refid="licenseDAO.selectLicenseBoardListCondition" />
+		ORDER BY 
+		BOARD_WRITEDATE desc
+		
+		<isEqual property="isLimit" compareValue="1">
+		limit 2
+		</isEqual>
+		<isNotEqual property="isLimit" compareValue="1">
+		limit #firstIndex#,#pageUnit#
+		</isNotEqual>
+		
+	
+	</select>
+	<select id="licenseDAO.selectBoardListCnt" resultClass="java.lang.Integer">
+		SELECT 
+			count(*)
+		from 
+			KU_CERTIFICATION_BOARD
+		where 
+			SUBJECT_CD = #subjectCd#
+			AND
+			DEL_YN = 'N'
+			
+		<include refid="licenseDAO.selectLicenseBoardListCondition" />
+		
+	</select>
+	
+	<select id="licenseDAO.selectBoardDetail" resultClass="egovMap">
+		SELECT
+			*,ku.USR_SRVPROFILEPIC
+		FROM
+			KU_CERTIFICATION_BOARD kb INNER JOIN KU_USER ku
+		ON 
+			kb.BOARD_WRITER  = ku.USR_EMAIL 
+		
+		WHERE
+			BOARD_IDX = #boardIdx#
+		
+	
+	</select>
+	<select id="licenseDAO.getBoardReplyList" resultClass="egovMap">
+	SELECT
+	 u.USR_NICKNAME , r.REPLY_IDX ,r.REPLY_CONTENT ,DATE_FORMAT(r.REPLY_WRITEDATE,'%Y.%m.%d-%H:%i') as REPLY_WRITEDATE,r.REPLY_WRITER,
+		 (select count(*) from KU_REPLYLIKE as rl where rl.REPLY_IDX = r.REPLY_IDX and rl.BOARD_CODE = 1) as LIKE_NUM
+	FROM
+		 KU_REPLY as r inner join KU_USER as u 
+	ON
+		 u.USR_EMAIL = r.REPLY_WRITER 
+	WHERE
+		 r.BOARD_IDX = #boardIdx#
+	 AND r.BOARD_NAME = #subjectCd#
+	ORDER BY r.REPLY_WRITEDATE DESC
+	</select>
+	
+	<insert id="licenseDAO.insertLicenseBoard" >
+	INSERT INTO
+		KU_CERTIFICATION_BOARD(
+		BOARD_TITLE, 
+		BOARD_CONTENT,
+		BOARD_VIEWNUM, 
+		BOARD_WRITER,
+		SUBJECT_CD,
+		SUBJECT_NAME  
+		)
+	VALUES(
+		#boardTitle#,
+		#boardContent#,
+		#boardViewnum#,
+		#boardWriter#,
+		#subjectCd#,
+		#subjectName#
+	)
+	<selectKey keyProperty="boardIdx" resultClass="java.lang.Integer">
+				SELECT @@IDENTITY
+			</selectKey>
+	
+	</insert>
+	
+	<insert id="licenseDAO.insertLicenseBoardFile">
+		INSERT INTO KU_FILE(
+		    FILE_TBL_IDX,
+		    FILE_TBL_CODE,
+		    FILE_USR_FILE,
+		    FILE_SRV_FILE,
+		    FILE_DEL_YN,
+		    FILE_REG_IDX,
+		    FILE_REG_NICK,
+		    FILE_MOD_DATE,
+		    BF_TYPE
+		) VALUES (
+			#fileTblIdx#,
+			#fileTblCode#,
+		    #fileUsrFile#,
+		    #fileSrvFile#,
+		    'N',
+		    #fileRegIdx#,
+		    #fileRegNick#,
+			NOW(),
+			#bfType#
+		)
+	
+	</insert>
+	
+	<update id="licenseDAO.updateViewCnt">
+	 	UPDATE 
+	    	KU_CERTIFICATION_BOARD 
+	    SET
+	    	BOARD_VIEWNUM = BOARD_VIEWNUM + 1
+	    WHERE
+	    	BOARD_IDX= #boardIdx# AND SUBJECT_CD = #subjectCd#
+	</update>
+	
+	<select id="licenseDAO.likeCnt" resultClass="java.lang.Integer">
+		SELECT 
+			COUNT(*)
+		FROM
+			KU_BOARDLIKE kb 
+		WHERE 
+			BOARD_IDX = #boardIdx# and BOARD_NAME = #subjectCd#
+		
+	</select>
+	<select id="licenseDAO.boardFileList" resultClass="egovMap">
+		SELECT 
+			*
+		FROM
+			KU_FILE
+		WHERE
+			FILE_TBL_IDX = #boardIdx#
+		AND
+			FILE_TBL_CODE = 10
+		AND
+			FILE_DEL_YN = 'N'
+	</select>
+	<insert id="licenseDAO.insertLike">
+		INSERT INTO KU_BOARDLIKE(
+    		BOARD_IDX,
+    		BOARD_DETAILNAME,
+    		BOARD_NAME,
+    		LIKE_USRNAME,
+    		BOARD_CODE
+    		)
+	    VALUES(
+	    	#boardIdx#,
+	    	#subjectName#,
+	    	#subjectCd#,
+	    	#usrId#,
+	    	#boardCode#
+	    	)
+	</insert>
+	<update id="licenseDAO.updateBoardDelete">
+		 UPDATE 
+	   		KU_CERTIFICATION_BOARD
+	   	SET 
+	   		DEL_YN = 'Y' 
+	    WHERE
+	    	BOARD_IDX = #boardIdx# 
+	</update>
+	<select id="licenseDAO.selectDateListCnt" resultClass="java.lang.Integer">
+		SELECT 
+			count(*)
+		FROM 
+			KU_CERTIFICATION_DATE
+			
+		WHERE 
+			SUBJECT_CD = #subjectCd# 
+				AND
+					(
+						(WTEST_APLC_ENDDT >= now() OR PTEST_APLC_ENDDT >= now()) 
+					OR  
+						(WTEST_ENDDT >= now() OR PTEST_ENDDT >= now())
+					)
+				
+		ORDER BY 
+			WTEST_APLC_STARTDT ASC
+		<isEqual property="isLimit" compareValue="1">
+		limit 2
+		</isEqual>
+		
+	</select>
+	<update id="licenseDAO.deleteBoardFile">
+	UPDATE 
+			KU_FILE
+	    SET
+			FILE_DEL_YN = 'Y',
+			MOD_IDX  = #modIdx#,
+			MOD_NAME = #modName#,
+			FILE_MOD_DATE = NOW()
+		WHERE
+			FILE_IDX = #fileIdx#
+	</update>
+	<update id="licenseDAO.updateBoard">
+		UPDATE 
+	    	KU_CERTIFICATION_BOARD
+	    SET
+	    	BOARD_CONTENT = #boardContent# , BOARD_TITLE = #boardTitle#
+	    WHERE
+	    	BOARD_IDX= #boardIdx# AND SUBJECT_NAME = #subjectName#
+	</update>
+	<select id="licenseDAO.checkAuth" resultClass="java.lang.Integer">
+	SELECT 
+		COUNT(*)
+	FROM 
+		KU_CERTIFICATION_SINTEREST kcs 
+	WHERE 
+		USER_IDX = #usrIdx# AND SUBJECT_CD = #subjectCd#
+	</select>
+	
+	<select id="licenseDAO.selectLicenseQual" resultClass="egovMap">
+	SELECT 
+		EMQUAL_DESCRIPTION
+	FROM 
+		KU_CERTIFICATION_QUALIFY  
+	WHERE 
+		GROUP_NAME = (SELECT SERIES_NAME FROM KU_CERTIFICATION_SUBJECT  WHERE SUBJECT_CD = #subjectCd#)
+	</select>
+	
+	<select id="licenseDAO.selectRegisteredLic" resultClass="egovMap">
+		SELECT 
+			SUBJECT_CD  
+		FROM  
+			KU_CERTIFICATION_SINTEREST kcs 
+		WHERE 
+			REG_ID  = (SELECT USR_EMAIL FROM KU_USER WHERE USR_IDX = #usrIdx#) and not SUBJECT_CD = ""
+	</select>
+</sqlMap>

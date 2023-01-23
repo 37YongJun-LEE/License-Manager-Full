@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="fileDAO">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+    <typeAlias  alias="fileVO" type="egovframework.cms.com.service.EgovCmsComFileVO"/>
+
+	<select id="fileDAO.selectFileList" parameterClass="fileVO" resultClass="fileVO">
+		SELECT
+			FIL_IDX	AS filIdx,
+		 	IDX AS idx,
+		 	FIL_PATH AS filPath,
+		 	FIL_USR_NAME AS filUsrName,
+		 	FIL_SVR_NAME AS filSvrName,
+		 	FIL_SIZE AS filSize
+		 FROM
+		 	TW_FILES AI
+		 WHERE
+			1=1 and
+			IDX = #idx# 
+		 AND
+			FIL_PATH = #filPath#
+		ORDER BY
+			FIL_IDX asc
+	</select>
+	
+	<select id="fileDAO.fileSelectById" parameterClass="fileVO" resultClass="fileVO">
+		<![CDATA[
+		SELECT
+			FIL_IDX as filIdx, 
+			FIL_PATH as filPath,
+		 	FIL_USR_NAME AS filUsrName,
+		    FIL_SVR_NAME as filSvrName
+		FROM TW_FILES
+		WHERE FIL_IDX = #filIdx#
+		]]>
+	</select>
+	
+	<select id="fileDAO.fileSelectByIdPath" parameterClass="fileVO" resultClass="fileVO">
+		<![CDATA[
+		SELECT
+			FIL_IDX as filIdx, 
+			FIL_PATH as filPath,
+			FIL_USR_NAME AS filUsrName,
+		    FIL_SVR_NAME as filSvrName
+		FROM TW_FILES
+		WHERE IDX = #idx#
+		AND
+			FIL_PATH = #filPath#
+		]]>
+	</select>
+	
+	<select id="fileDAO.selectFileDelList" parameterClass="fileVO" resultClass="fileVO">
+		SELECT
+			FIL_IDX	AS filIdx,
+		 	IDX AS idx,
+		 	FIL_PATH AS filPath,
+		 	FIL_USR_NAME AS filUsrName,
+		 	FIL_SVR_NAME AS filSvrName,
+		 	FIL_SIZE AS filSize
+		 FROM
+		 	TW_FILES AI
+		 WHERE
+			1=1 and
+			IDX = #idx# AND
+			FIL_PATH = #filPath#
+			
+		ORDER BY
+			FIL_IDX asc
+	</select>
+
+	<insert id="fileDAO.fileInsert">
+		<![CDATA[
+		INSERT INTO TW_FILES (
+			IDX,
+			FIL_PATH,
+			FIL_USR_NAME,
+			FIL_SVR_NAME,
+			FIL_SIZE,
+			REG_ADM_YN,
+		    REG_IDX,
+		    REG_NAME,
+		    REG_IP,
+		    REG_DATE
+		)
+		VALUES (
+			#idx# 
+			,	#filPath# 
+			,	#filUsrName# 
+			,	#filSvrName#
+			,	#filSize# 
+			,	#regAdmYn#
+		    ,	#regIdx#
+			,   #regName#
+			,   #regIp#
+		    ,	now()
+		)
+		]]>
+	</insert>
+	
+	<update id="fileDAO.fileUpdate">
+		UPDATE TW_FILES SET
+			FIL_USR_NAME 	= #filUsrName#
+			,FIL_SVR_NAME 	= #filSvrName#
+			,FIL_SIZE 		= #filSize#
+			,MOD_ADM_YN		= #modAdmYn#
+		    ,MOD_IDX 		= #modIdx#
+			,MOD_NAME		= #modName#
+			,MOD_IP  		= #modIp#
+			,MOD_DATE 		= now()
+		WHERE
+			FIL_IDX = #filIdx#
+	</update>
+	
+	<delete id="fileDAO.fileDelete">
+		<![CDATA[
+		DELETE FROM TW_FILES WHERE FIL_IDX = #filIdx#
+		]]>
+	</delete>
+	
+	<delete id="fileDAO.fileDeleteAll">
+		<![CDATA[
+		DELETE FROM TW_FILES WHERE IDX = #idx# AND FIL_PATH = #filPath#
+		]]>
+	</delete>
+</sqlMap>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="comLogDAO">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+    <typeAlias  alias="comLogVO" type="egovframework.cms.com.service.EgovCmsComLogVO"/>
+    <typeAlias  alias="comLogUsrStatVO" type="egovframework.cms.com.service.EgovCmsComLogUsrStatVO"/>
+
+	<insert id="comLogDAO.insertLogAdm">
+		INSERT INTO TW_LOG_ADM_ACCESS (
+			MENU_CD,
+			MENU_NAME,
+			MENU_URL,
+			LOG_CONT,
+			REG_IDX,
+			REG_NAME,
+			REG_IP,
+			REG_DATE
+		) VALUES (
+			#menuCd#,
+			#menuName#,
+			#menuUrl#,
+			#logCont#,
+			#regIdx#,
+			#regName#,
+			#regIp#,
+			now()
+		)
+	</insert>
+
+	<insert id="comLogDAO.insertLogUsr">
+		INSERT INTO TW_LOG_USR_ACCESS (
+			MENU_IDX,
+			MENU_NAME,
+			MENU_URL,
+			LOG_CONT,
+			REG_IDX,
+			REG_NAME,
+			REG_IP,
+			REG_DATE
+		) VALUES (
+			#menuIdx#,
+			#menuName#,
+			#menuUrl#,
+			#logCont#,
+			#regIdx#,
+			#regName#,
+			#regIp#,
+			now()
+		)
+	</insert>
+	
+	<select id="comLogDAO.checkLogUsrStat" parameterClass="comLogUsrStatVO" resultClass="int">
+	/* comLogDAO.checkLogUsrStat */
+		SELECT COUNT(*) as calcLogCount
+		FROM
+			TB_LOG_USR_STAT
+		WHERE
+			REG_IP = #regIp#
+		AND
+			SITE_CD = #siteCd#
+		AND
+			REG_DATE >= DATEADD(HOUR, -2, now())
+	</select>
+	
+	<insert id="comLogDAO.insertLogUsrStat">
+		INSERT INTO TB_LOG_USR_STAT (
+			SITE_CD
+			, DEVICE_CD
+			, LOG_REFERER_CD
+			, LOG_REFERER
+			, LOG_AGENT
+			, LOG_OS
+			, LOG_BROWSER
+			, REG_IDX
+			, REG_NAME
+			, REG_IP
+			, REG_DATE
+		) VALUES (
+			#siteCd#
+			, #deviceCd#
+			, #logRefererCd#
+			, #logReferer#
+			, #logAgent#
+			, #logOs#
+			, #logBrowser#
+			, #regIdx#
+			, #regName#
+			, #regIp#
+			, now()
+		)
+	</insert>
+	
+	<update id="comLogDAO.updateLogUsrStatDaily" parameterClass="comLogUsrStatVO">
+	/* comLogDAO.updateLogUsrStatDaily */
+		MERGE INTO TB_LOG_USR_STAT_DATE AS T
+		USING (SELECT YMD = #ymd#, SITE_CD = #siteCd#) AS S
+		ON (
+			T.YMD = S.YMD
+			AND T.SITE_CD = S.SITE_CD
+		)
+		WHEN MATCHED THEN
+			UPDATE
+			SET
+				T.PV_CNT = PV_CNT+1
+			<isEqual property="uvCnt" compareValue="1">
+				, T.UV_CNT = UV_CNT+1
+			</isEqual>
+				, T.MOD_IDX = #modIdx#
+				, T.MOD_NAME = #modName#
+				, T.MOD_IP = #modIp#
+				, T.MOD_DATE = now()
+		WHEN NOT MATCHED BY TARGET THEN
+			INSERT	 (
+				YMD
+				, SITE_CD
+				, UV_CNT
+				, PV_CNT
+				, REG_IDX
+				, REG_NAME
+				, REG_IP
+				, REG_DATE
+			) VALUES (
+				#ymd#
+				, #siteCd#
+			<isEqual property="uvCnt" compareValue="1">
+				, 1
+			</isEqual>
+			<isNotEqual property="uvCnt" compareValue="1">
+				, 0
+			</isNotEqual>
+				, 1
+				, #regIdx#
+				, #regName#
+				, #regIp#
+				, now()
+			);
+	</update>
+</sqlMap>

@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="kkuAdminPage">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  <typeAlias  alias="EgovKkuAppUserVO" type="egovframework.kku.usr.service.EgovKkuAppUserVO"/>
+  
+  <resultMap id="userMap" class="egovframework.kku.usr.service.EgovKkuAppUserVO">
+   	<result property="usrIdx" column="USR_IDX"/>
+  	<result property="usrEmail" column="USR_EMAIL"/>
+  	<result property="usrNickname" column="USR_NICKNAME"/>
+  	<result property="usrPassword" column="USR_PASSWORD"/>
+  	<result property="usrName" column="USR_NAME"/>
+  	<result property="usrStdnum" column="USR_STDNUM"/>
+  	<result property="usrDepartment" column="USR_DEPARTMENT"/>
+  	<result property="usrMajor" column="USR_MAJOR"/>
+  	<result property="nickChangedate" column="NICK_CHANGEDATE"/>
+  	<result property="usrDeleteyn" column="USR_DELETEYN"/>
+  </resultMap>
+  
+  
+  	<select id ="KkuAdminDAO.chkAdminAccount" resultClass="java.lang.Integer">
+  	    SELECT COUNT(*)
+  	    FROM KU_USER
+  	    WHERE USR_EMAIL = #usrEmail# AND USR_PASSWORD = #usrPassword# AND USR_RANK = 4
+  	</select>
+  	
+  	<select id ="KkuAdminDAO.searchAdminAccount" resultClass="egovMap">
+  	    SELECT 
+  	    	USR_IDX
+  	    	,USR_NICKNAME
+  	    FROM KU_USER
+  	    WHERE USR_EMAIL = #usrEmail#
+  	</select>
+  
+	<select id="KkuAdminDAO.selectAllUserInfo" resultClass="egovMap">
+	    <![CDATA[
+	    SELECT
+	    	USR_IDX, USR_EMAIL, USR_NICKNAME, USR_STDNUM, USR_DEPARTMENT, USR_MAJOR, USR_RANK, SIGNUP_DATE
+	    FROM 
+	    	KU_USER
+	    WHERE
+			USR_IDX >= 0
+		]]>
+	    <isNotEmpty prepend="AND" property="searchSdate">
+			<![CDATA[ SIGNUP_DATE >= #searchSdate# ]]>
+		</isNotEmpty>	
+		<isNotEmpty prepend="AND" property="searchEdate">
+			<![CDATA[ SIGNUP_DATE <= #searchEdate# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="StdNum">
+				USR_STDNUM LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="name">
+				USR_NAME LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="depart">
+				USR_DEPARTMENT LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>			
+			<isEqual prepend="AND" property="searchCondition" compareValue="major">
+					USR_MAJOR LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="ALL">
+				(USR_STDNUM LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				USR_NAME LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				USR_DEPARTMENT LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				USR_MAJOR LIKE  CONCAT('%', #searchKeyword# , '%'))
+			</isEqual>
+		</isNotEmpty>
+		
+		limit #firstIndex#, #pageUnit#
+	</select>
+	
+	<select id="KkuAdminDAO.selectAllNormalUserInfo" resultClass="egovMap">
+		<![CDATA[
+		    SELECT
+		    	USR_IDX, USR_EMAIL, USR_NICKNAME, USR_STDNUM, USR_DEPARTMENT, USR_MAJOR, USR_RANK, SIGNUP_DATE
+		    FROM 
+		    	KU_USER
+		    WHERE USR_RANK < 4
+	    ]]>
+	    
+	    <isNotEmpty prepend="AND" property="searchSdate">
+			<![CDATA[ SIGNUP_DATE >= #searchSdate# ]]>
+		</isNotEmpty>	
+		<isNotEmpty prepend="AND" property="searchEdate">
+			<![CDATA[ SIGNUP_DATE <= #searchEdate# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="StdNum">
+				USR_STDNUM LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="name">
+				USR_NAME LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="depart">
+				USR_DEPARTMENT LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>			
+			<isEqual prepend="AND" property="searchCondition" compareValue="major">
+					USR_MAJOR LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="ALL">
+				(USR_STDNUM LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				USR_NAME LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				USR_DEPARTMENT LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				USR_MAJOR LIKE  CONCAT('%', #searchKeyword# , '%'))
+			</isEqual>
+		</isNotEmpty>
+		
+		limit #firstIndex#, #pageUnit#
+	</select>
+	
+	<select id="KkuAdminDAO.selectAllAdminUserInfo" resultClass="egovMap">
+	    <![CDATA[
+		    SELECT
+		    	USR_IDX, USR_EMAIL, USR_NICKNAME, USR_STDNUM, USR_DEPARTMENT, USR_MAJOR, USR_RANK, SIGNUP_DATE
+		    FROM 
+		    	KU_USER
+		    WHERE USR_RANK >= 4
+	    ]]>
+	    
+	    <isNotEmpty prepend="AND" property="searchSdate">
+			<![CDATA[ SIGNUP_DATE >= #searchSdate# ]]>
+		</isNotEmpty>	
+		<isNotEmpty prepend="AND" property="searchEdate">
+			<![CDATA[ SIGNUP_DATE <= #searchEdate# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="StdNum">
+				USR_STDNUM LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="name">
+				USR_NAME LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="depart">
+				USR_DEPARTMENT LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>			
+			<isEqual prepend="AND" property="searchCondition" compareValue="major">
+					USR_MAJOR LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="ALL">
+				(USR_STDNUM LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				USR_NAME LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				USR_DEPARTMENT LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				USR_MAJOR LIKE  CONCAT('%', #searchKeyword# , '%'))
+			</isEqual>
+		</isNotEmpty>
+		
+		limit #firstIndex#, #pageUnit#
+	</select>
+	
+	<select id="KkuAdminDAO.selectAllBoardInfo" resultClass="egovMap">
+	    SELECT
+	    	BOARD_IDX, BOARD_DETAILNAME, BOARD_NAME ,BOARD_WRITER, BOARD_WRITEDATE, BOARD_VIEWNUM, BOARD_TITLE, BOARD_CONTENT
+	    FROM 
+	    	KU_BOARD
+	
+	</select >
+    
+	<select id="KkuAdminDAO.selectModifyUserInfo" parameterClass="EgovKkuAppUserVO" resultMap="userMap">
+	    SELECT 
+	    	USR_IDX, USR_EMAIL, USR_NICKNAME, USR_PASSWORD, USR_NAME, USR_STDNUM, USR_DEPARTMENT, USR_MAJOR, NICK_CHANGEDATE,USR_DELETEYN
+	    FROM 
+	    	KU_USER
+	    WHERE
+	   		USR_EMAIL = #usrEmail#
+	</select>
+	
+	<select id="KkuAdminDAO.selectUserListCnt" resultClass="java.lang.Integer">
+	    SELECT 
+	    	COUNT(*)
+	    FROM 
+	    	KU_USER
+	</select>
+	
+	<select id="KkuAdminDAO.selectAdminUserListCnt" resultClass="java.lang.Integer">
+	    <![CDATA[
+		    SELECT 
+		    	COUNT(*)
+		    FROM 
+		    	KU_USER
+		    WHERE
+		    	USR_RANK >= 4
+    	]]>
+	</select>
+	
+	<select id="KkuAdminDAO.selectNormalUserListCnt" resultClass="java.lang.Integer">
+	    <![CDATA[
+		    SELECT 
+		    	COUNT(*)
+		    FROM 
+		    	KU_USER
+		    WHERE
+		    	USR_RANK < 4
+    	]]>
+	</select>
+
+	<update id="KkuAdminDAO.updateUserInfo" >
+		UPDATE 
+			KU_USER
+	    SET
+			USR_NAME  = #usrName#,
+			USR_EMAIL = #usrEmail#,
+			USR_MAJOR  = #usrMajor#,
+		<isNotEmpty property="usrPassword">
+			USR_PASSWORD = #usrPassword#,
+		</isNotEmpty>
+			USR_DELETEYN    = #usrDeleteyn#, 
+			USR_NICKNAME   = #usrNickname#,
+			USR_DEPARTMENT  = #usrDepartment#,
+			USR_RANK = #usrRank#
+		WHERE USR_IDX = #usrIdx#
+	</update>
+
+
+</sqlMap>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<!--
+	수정일                 수정자                          수정내용
+  =========     =======    =================================================
+  2011.8.12   	서준식     	 	테이블 표준화에 따른 수정사항 반영
+  							RESTDE 컬럼에  RESTDEDE  alias 지정
+  2011.10.06	이기하 		보안 취약점 점검사항 반영 #->#변경
+-->
+<sqlMap namespace="pmsComSms">
+
+	<insert id="pmsComSmsDAO.insertSms">
+	/** pmsComSmsDAO.insertSms */
+		<![CDATA[
+			INSERT
+			  INTO  em_tran
+			     (  tran_phone
+				 ,  tran_callback
+				 ,  tran_status
+				 ,  tran_date
+				 ,  tran_msg
+			     ,  tran_id			      
+			     ,  tran_etc1			      
+			     ,  tran_type			      
+			     )
+			VALUES
+			     (  #tran_phone#
+				 ,  #tran_callback#
+				 ,  '1'
+				 ,  now()
+				 ,  #tran_msg#
+			     ,  #tran_id#			   		        
+			     ,  #tran_etc1#			   		        
+			     ,  '4'			   		        
+			     )
+		]]>
+	</insert>
+
+</sqlMap>

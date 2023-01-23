@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="mypageDAO">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+    
+
+    <select id="chatDAO.ifExistRoom" resultClass="String">	
+		SELECT 
+			ROOM_ID
+		FROM
+			KU_CHATROOM
+		WHERE 
+			WRITER IN (#writer#,#receiver#)
+		 GROUP BY ROOM_ID HAVING COUNT(ROOM_ID) > 1;
+	</select>
+
+	<update id="chatDAO.makeRoom">
+		INSERT INTO KU_CHATROOM 
+			(ROOM_ID, WRITER)
+		VALUES
+			(#roomId#, #writer#),
+			(#roomId#, #receiver#)
+	</update>
+	
+	
+    <select id="chatDAO.selectChatInfo" resultClass="egovMap">	
+		SELECT 
+			KC.ROOM_ID, KC.WRITER,
+			KU.USR_NICKNAME, KU.USR_NAME, KU.USR_IDX, KU.PHONE_NUMBER, KU.USR_SRVPROFILEPIC, KU.USR_MAJOR, SUBSTRING(KU.USR_STDNUM, 3, 2) AS HACKBUN
+		FROM KU_CHATROOM AS KC
+		INNER JOIN KU_USER AS KU
+		ON
+			KC.WRITER = KU.USR_IDX
+		AND 
+			KC.ROOM_ID = #roomId#
+	</select>
+	
+ 	<update id="chatDAO.insertMessage">
+		INSERT INTO KU_MESSAGE
+			(WRITER, MESSAGE, ROOM_ID, READ_CHECK, IMAGE_FILE)
+		VALUES
+			(#writer#, #message#, #roomId#, #readCheck#, #imageFile#)
+	</update>
+	
+ 	<update id="chatDAO.readMessage">
+		UPDATE 
+			KU_MESSAGE
+		SET
+			READ_CHECK = 0
+		WHERE
+			ROOM_ID = (SELECT ROOM_ID FROM KU_CHATROOM WHERE SOCKET_ID = #socketId#)
+		AND 
+			READ_CHECK = 1
+		AND NOT 
+			WRITER = (SELECT WRITER FROM KU_CHATROOM WHERE SOCKET_ID = #socketId#)
+	</update>
+	
+    <select id="chatDAO.messageHistory" resultClass="egovMap">	
+		SELECT
+			WRITER,	MESSAGE, READ_CHECK, MESSAGE_TIME, IMAGE_FILE
+		FROM
+			KU_MESSAGE
+		WHERE
+			ROOM_ID = #roomId#
+		ORDER BY
+			MESSAGE_TIME ASC;    
+	</select>
+	
+    <select id="chatDAO.selectChatList" resultClass="egovMap">	
+		SELECT 
+			R.ROOM_ID, R.WRITER, U.USR_NICKNAME, U.USR_SRVPROFILEPIC,
+			(SELECT MESSAGE FROM KU_MESSAGE WHERE ROOM_ID=R.ROOM_ID ORDER BY MESSAGE_TIME DESC LIMIT 1) AS LAST_MSG,
+			(SELECT IMAGE_FILE FROM KU_MESSAGE WHERE ROOM_ID=R.ROOM_ID ORDER BY MESSAGE_TIME DESC LIMIT 1) AS LAST_IMAGE,
+			(SELECT COUNT(*) FROM KU_MESSAGE WHERE ROOM_ID=R.ROOM_ID AND READ_CHECK =1 AND NOT WRITER = #writer#) AS NOT_READ_MSG,
+			(SELECT COUNT(*) FROM KU_MESSAGE WHERE ROOM_ID=R.ROOM_ID) AS ALL_MSG,
+			(SELECT MESSAGE_TIME FROM KU_MESSAGE WHERE ROOM_ID=R.ROOM_ID ORDER BY MESSAGE_TIME DESC LIMIT 1) AS TIME
+		FROM 
+			KU_CHATROOM AS R
+		INNER JOIN
+			KU_USER AS U
+		ON
+			R.WRITER = U.USR_IDX
+		AND
+			R.ROOM_ID IN (SELECT ROOM_ID FROM KU_CHATROOM WHERE WRITER = #writer#)
+		AND NOT 
+			WRITER = #writer#
+		ORDER BY
+			TIME DESC
+	</select>	
+	
+ 	<update id="chatDAO.updateSocketId">
+		UPDATE 
+			KU_CHATROOM 
+		SET
+			SOCKET_ID = #socketId#
+		WHERE
+			ROOM_ID = #roomId#
+		AND 
+			WRITER = #writer# 	
+	</update>
+	
+ 	<update id="chatDAO.deleteSocketId">
+		UPDATE  
+			KU_CHATROOM 
+		SET
+			SOCKET_ID = null
+		WHERE
+			SOCKET_ID = #socketId#
+	</update>	
+	
+    <select id="chatDAO.selectRoomId" resultClass="String">
+		SELECT 
+			ROOM_ID 
+		FROM 
+			KU_CHATROOM
+		WHERE 
+			SOCKET_ID = #sessionId#
+	</select>
+
+    <select id="chatDAO.ifOtherConnect" resultClass="int">	
+		SELECT 
+			COUNT(*)
+		FROM
+			KU_CHATROOM
+		WHERE
+			ROOM_ID = #roomId#
+		AND NOT
+			WRITER = #writer#
+		AND NOT
+			SOCKET_ID IS NULL;
+	</select>
+
+	
+    <select id="chatDAO.selectNotReadMessage" resultClass="int">	
+		SELECT 
+			COUNT(*)
+		FROM
+			KU_MESSAGE
+		WHERE 
+			ROOM_ID IN (SELECT ROOM_ID FROM KU_CHATROOM WHERE WRITER = #usrIdx#)
+		AND NOT 
+			WRITER = #usrIdx#
+		AND 
+			READ_CHECK = 1;
+	</select>	
+	
+</sqlMap>

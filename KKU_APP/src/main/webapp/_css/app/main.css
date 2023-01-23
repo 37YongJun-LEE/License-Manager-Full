@@ -1,0 +1,86 @@
+/* 리스트 형식 */
+div.m_event								{width:100%; box-sizing:border-box; padding:10px 20px 0 20px;}
+div.m_notice								{width:100%; box-sizing:border-box; padding:20px 17px;}
+
+.cont_box									{width:100%;  box-sizing:border-box; background:#f5f5f5; border-radius:10px; padding:15px 20px; margin-bottom:30px;}
+.cont_box li								{width:100%; overflow:hidden;}
+.cont_box li+li							{margin-top:5px;}
+.cont_box p.cont_date				{float:left; font: 400 16px/24px 'Montserrat', sans-serif; color:#ee2c49; display:inline-block; width:15%; margin-right:10px; vertical-align:top;}
+.cont_box p.cont_text				{float:left; width:80%;}
+.cont_box a								{display:inline-block; width:100%; font: 400 15px/24px 'NotoSansKR', sans-serif; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+
+div.m_cont_tit							{overflow:hidden;}
+div.m_cont_tit h2						{float:left;}
+div.m_cont_tit p						{float:right;}
+a.m_more									{font: 400 14px/14px 'NotoSansKR', sans-serif; color:#666; background:url('/_img/app/comn/arrow.png') no-repeat right top 1px ; background-size:6px; display:inline-block; padding-right:17px; margin-top:5px;}
+
+/* 게시글 스타일01 */
+ul.notice_list								{width:100%; margin-top:-20px;}
+ul.notice_list	li							{width:100%; border-bottom:solid 1px #ddd; overflow:hidden; padding:15px 8px; box-sizing:border-box;}
+ul.notice_list	li:last-child			{border-bottom:none;}
+ul.notice_list	p:hover					{cursor:pointer;}
+ul.notice_list .no_tit					{float:left; max-width:70%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font: 500  16px/22px 'NotoSansKR', sans-serif;}		
+.no_cate									{float:left; font: 400 14px/20px 'NotoSansKR', sans-serif; text-align:center; color:#fff; margin-right:7px; background:#ee2c49; padding:2px 7px 0px 7px; border-radius:15px; }
+.new											{color:#ee2c49; font: 400 16px/18px 'MontserratItalic', sans-serif; letter-spacing:-0.8px; display:inline-block; margin:0 5px;}
+.no_top									{width:100%; max-width:95%; height:25px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font: 500 16px/22px 'NotoSansKR', sans-serif; }
+.no_top02								{width:100%; height:25px; font: 500 15px/20px 'NotoSansKR', sans-serif;  margin-top:2px; }
+.no_text									{clear:both; padding-top:8px; width:100%; font: 400 15px/21px 'NotoSansKR', sans-serif; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2;  -webkit-box-orient: vertical; }
+.no_date									{margin-top:8px; font: 400 15px/21px 'NotoSansKR', sans-serif; color:#aaa;}
+
+/* 게시글 스타일02 */
+ul.notice_list02							{width:100%; margin-top:-15px;}
+ul.notice_list02	li						{width:100%; border-bottom:solid 1px #ddd; overflow:hidden; padding:10px 5px; box-sizing:border-box;}
+ul.notice_list02	li:last-child		{border-bottom:none;}
+ul.notice_list02 .no_tit				{float:left; max-width:calc(100% - 120px); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font: 500  15px/20px 'NotoSansKR', sans-serif;}
+ul.notice_list02 .no_date			{float:right; margin:0; width:75px; text-align:right;}
+
+
+/* main 시작 ----------------------------------------------------------- */
+/* m_slider01 */
+.m_slider01_wrap				{width:100%; box-sizing:border-box; padding:0 15px 0; text-align:center; margin-top:10px;}
+.m_slider01_wrap img		{width:100%; }
+ul.m_slider01					{width:100%; position:relative; overflow:hidden; border-radius:10px;}
+ul.m_slider01 li					{float:left; text-align:center; overflow:hidden;}
+.color_box						{position:absolute; z-index:-1; width:100%; background:#ee2c49; height:50%; top:-20%;}
+
+/* 전국 총 교류회 */
+div.m_location						{width:100%; box-sizing:border-box; padding:0 20px 20px; }
+div.m_location ul					{width:100%; overflow:hidden; text-align:center; }
+div.m_location ul li				{float:left; width:33%; margin-bottom:10px; box-sizing:border-box;}
+div.m_location ul li a				{display:inline-block; box-sizing:border-box; border:solid 1px #ddd; border-radius:50%; background:url('/_img/app/main/location.png')no-repeat center top 14px; background-size:17px; font: 500 14px/16px 'NotoSansKR', sans-serif; text-align:center; padding:40px 10px 20px 10px; width:90px; height:90px; }
+div.m_location ul li.biz_go a	{background:url('/_img/app/main/bizgo.png')no-repeat center top 18px; background-size:23px; background-color:#ee2c49; border:none; color:#fff; }
+
+/* m_slider02 */
+ul.m_slider02				{width:100%; overflow:hidden; margin-top:40px;}
+ul.m_slider02 img			{width:100%;}
+ul.m_slider02 li				{float:left;}
+
+span.pagingInfo			{background:rgba(0,0,0,0.5); font: 300  14px/14px 'NotoSansKR', sans-serif;  color:#fff; display:block; width:40px; padding:5px 3px; border-radius:15px; text-align:center; float:right; right:17px; position:absolute; margin-top:-35px;}
+
+/*광고/관리자 바로가기 버튼*/
+div.m_btn	{padding:18px 17px 0 17px; margin-top:30px; border-top:solid 4px #f5f5f5;}
+div.m_btn p	{}
+div.m_btn p a{font-weight:500; display:block; margin-bottom:10px; border:solid 1px #ddd; background: url(/_img/app/comn/arrow.png) no-repeat 95% 50%/6px; padding:8px;}
+div.m_btn p a img{margin-right:5px;}
+/* lo_main  시작------------------------------------------------------*/
+/* header */
+div.lo_main #header		{width:100%; overflow:hidden; background:#ff9625;}
+div.lo_main .color_box	{background:#ff9625; height:270px;}
+.btn_lo							{width:100%;  background:#ff9625; height:17px; }
+.btn_lo	a						{background:#0065b3; text-align:center; font-weight:400; color:#fff !important; display:block; float:right;  width:100px; padding:5px; border-radius:20px; margin-right:18px;}
+div.lo_main .no_cate		{background:#ff9625;}	
+div.lo_main .cont_box p{color:#ff9625;}
+
+/* 지원사업 */
+.coin								{display:inline-block; height:18px; width:18px; margin-left:5px; padding-bottom:1px; }
+div.lo_main span.coin	{background:url('../_img/main/coin_lo.png')no-repeat center bottom; background-size:17px;}
+
+
+/* n_main  시작-----------------------------------------------------*/
+/* header */
+div.n_main #header		{background:#15b4ed;}
+div.n_main .no_cate		{background:#15b4ed;}	
+div.n_main .cont_box p	{color:#15b4ed;}
+
+/* 지원사업 */
+div.n_main span.coin	{background:url('../_img/main/coin_num.png')no-repeat center bottom; background-size:17px; }

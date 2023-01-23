@@ -1,0 +1,43 @@
+package egovframework.kku.adm.service;
+
+import java.util.List;
+
+import egovframework.kku.usr.service.EgovKkuAppSchoolInfoCrawlerVO;
+import egovframework.rte.psl.dataaccess.util.EgovMap;
+
+
+public interface EgovKkuAdmCampusService {
+
+	public List<?> getReportList(EgovKkuAdmFacilityReportVO rVO) throws Exception;
+
+	public List<EgovMap> selectCampusInfoList(EgovKkuAdmCampusInfoVO infoVO) throws Exception;
+	
+	public List<?> selectCampusInfoUpdateList() throws Exception;
+	
+	public List<EgovMap> selectStudentInfoList(EgovKkuAppSchoolInfoCrawlerVO infoVO) throws Exception;
+
+	public List<?> selectStudentInfoUpdateList() throws Exception;
+
+	public EgovKkuAdmCampusInfoVO selectCampusInfoDetail(EgovKkuAdmCampusInfoVO infoVO) throws Exception;
+
+	public int updateCampusInfo(EgovKkuAdmCampusInfoVO infoVO) throws Exception;
+
+	public int selectCampusInfoListCnt(EgovKkuAdmCampusInfoVO infoVO) throws Exception;
+
+	public int selectStudentInfoListCnt(EgovKkuAppSchoolInfoCrawlerVO infoVO) throws Exception;
+
+	public EgovKkuAdmStudentInfoVO selectStudentInfoDetail(EgovKkuAdmStudentInfoVO infoVO) throws Exception;
+
+	public int updateStudentInfo(EgovKkuAdmStudentInfoVO infoVO) throws Exception;
+
+	public EgovMap selectFacilityReportDetailByIdx(EgovKkuAdmFacilityReportVO vo) throws Exception;
+
+	public void updateFixReportByIdx(EgovKkuAdmFacilityReportVO vo) throws Exception;
+
+	public int getReportListCnt(EgovKkuAdmFacilityReportVO vo) throws Exception;
+
+	
+
+	
+
+}

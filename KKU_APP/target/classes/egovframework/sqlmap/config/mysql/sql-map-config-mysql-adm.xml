@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMapConfig PUBLIC "-//iBATIS.com//DTD SQL Map Config 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+	<sqlMap resource="egovframework/sqlmap/kku/adm/EgovKkuAdm_AdmPage_SQL_MYSQL.xml"></sqlMap>
+	<sqlMap resource="egovframework/sqlmap/kku/adm/EgovKkuAdm_BOARD_SQL_MYSQL.xml"></sqlMap>
+	<sqlMap resource="egovframework/sqlmap/kku/adm/EgovKkuAdm_CAMPUS_SQL_MYSQL.xml"></sqlMap>
+	<sqlMap resource="egovframework/sqlmap/kku/adm/EgovKkuAdm_CHAT_SQL_MYSQL.xml"></sqlMap>
+	<sqlMap resource="egovframework/sqlmap/kku/adm/EgovKkuAdm_Community_SQL_MYSQL.xml" />
+	<sqlMap resource="egovframework/sqlmap/kku/adm/EgovKkuAdm_LECTUREINFO_SQL_MYSQL.xml"></sqlMap>
+	<sqlMap resource="egovframework/sqlmap/kku/adm/EgovKkuAdm_REPORT_SQL_MYSQL.xml"></sqlMap>
+	<sqlMap resource="egovframework/sqlmap/kku/adm/EgovKkuAdm_License_SQL_MYSQL.xml"></sqlMap>
+	
+</sqlMapConfig>
+

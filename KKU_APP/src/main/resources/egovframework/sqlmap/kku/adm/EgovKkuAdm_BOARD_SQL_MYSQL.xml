@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="kkuAdminBoardPage">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+
+  	<select id="adminBoardDAO.selectMajorBoardList" resultClass="egovMap">
+  	    SELECT 
+ 			km.MNOTICE_CATEGORY  ,ku.UNI_DEPARTMENT  , ku.UNI_URL,
+  	    	(SELECT COUNT(*) from KU_MAJORNOTICE km2 where km2.MNOTICE_CATEGORY = ku.UNI_MAJOR) as REPLY_NUM
+		FROM 
+			KU_MAJORNOTICE km inner join KU_UNI ku 
+		ON 
+			km.MNOTICE_CATEGORY = ku.UNI_MAJOR 
+		GROUP BY 
+			MNOTICE_CATEGORY
+  	    
+  	</select>
+  	<select id="adminBoardDAO.selectFreenoticeList" resultClass="egovMap">
+  		
+  		<![CDATA[
+  		SELECT 
+  			BOARD_IDX, BOARD_WRITER, BOARD_TITLE, BOARD_CONTENT, REPLACE(BOARD_WRITEDATE,"T"," ") as BOARD_WRITEDATE, BOARD_VIEWNUM, 
+  			BOARD_STATUS, REPLACE(REPLACE(BOARD_STATUS,1,"정상"),0,"삭제된 게시물") as BOARD_ST 
+		FROM 
+			KU_BOARD
+		WHERE
+			BOARD_IDX >= 0
+		]]>
+		<isNotEmpty prepend="AND" property="searchSdate">
+			<![CDATA[ BOARD_WRITEDATE >= #searchSdate# ]]>
+		</isNotEmpty>	
+		<isNotEmpty prepend="AND" property="searchEdate">
+			<![CDATA[ BOARD_WRITEDATE <= #searchEdate# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="title">
+				BOARD_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="content">
+				BOARD_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="name">
+				BOARD_WRITER LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>			
+			<isEqual prepend="AND" property="searchCondition" compareValue="ALL">
+				(BOARD_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				BOARD_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				BOARD_WRITER LIKE  CONCAT('%', #searchKeyword# , '%'))
+			</isEqual>
+		</isNotEmpty>
+		ORDER BY
+			BOARD_ST DESC
+		
+		limit #firstIndex#, #pageUnit#
+			
+  </select>
+  <select id="adminBoardDAO.selectFreenoticeInfoListCnt" resultClass="java.lang.Integer">
+  	<![CDATA[
+  		select
+	  		COUNT(*)  	
+		from 
+			KU_BOARD
+		WHERE
+			BOARD_IDX >= 0
+			  		]]>
+  		<isNotEmpty prepend="AND" property="searchSdate">
+			<![CDATA[ BOARD_WRITEDATE >= #searchSdate# ]]>
+		</isNotEmpty>	
+		<isNotEmpty prepend="AND" property="searchEdate">
+			<![CDATA[ BOARD_WRITEDATE <= #searchEdate# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="title">
+				BOARD_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="content">
+				BOARD_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="name">
+				BOARD_WRITER LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>			
+			<isEqual prepend="AND" property="searchCondition" compareValue="ALL">
+				(BOARD_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				BOARD_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				BOARD_WRITER LIKE  CONCAT('%', #searchKeyword# , '%'))
+			</isEqual>
+		</isNotEmpty>
+  </select>
+  <select id="adminBoardDAO.selectFreenoticeInfoDetail" resultClass="egovMap">
+  	SELECT
+  		*
+  	FROM
+  		KU_BOARD
+  	WHERE
+  		BOARD_IDX = #boardIdx#
+  </select>
+  <update id="adminBoardDAO.updateFreeenoticeInfo">
+	  UPDATE
+	  	KU_BOARD
+	  SET
+	  	BOARD_TITLE = #boardTitle#,
+	  	BOARD_WRITER = #boardWriter#,
+	  	BOARD_WRITEDATE = #boardWritedate#,
+	  	BOARD_STATUS = #boardStatus#,
+	  	BOARD_CONTENT = #boardContent#
+	  	
+	  WHERE
+	  	BOARD_IDX = #boardIdx#
+  
+  </update>
+  
+  <delete id="adminBoardDAO.deleteFreeenoticeInfo">
+  	DELETE
+  	FROM 
+  		KU_BOARD
+  	WHERE
+  		BOARD_IDX = #boardIdx#
+  		
+  </delete>
+  
+  <select id="adminBoardDAO.selectAllTradeList" resultClass="egovMap">
+  	SELECT
+  		*
+ 	FROM
+ 		KU_TRADE
+  </select>
+  
+</sqlMap>

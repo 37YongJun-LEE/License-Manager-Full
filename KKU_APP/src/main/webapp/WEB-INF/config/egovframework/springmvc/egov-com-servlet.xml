@@ -1,0 +1,124 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+ xmlns:context="http://www.springframework.org/schema/context" 
+ xmlns:mvc="http://www.springframework.org/schema/mvc" 
+ xmlns:p="http://www.springframework.org/schema/p"
+ xmlns:tx="http://www.springframework.org/schema/tx" 
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+ 
+ xmlns:task="http://www.springframework.org/schema/task"	
+ 
+ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd         
+ 					 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd         
+ 					 http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+ 					 
+ 					 http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.1.xsd">
+
+	<context:component-scan base-package="egovframework">
+		<context:include-filter expression="org.springframework.stereotype.Controller" type="annotation"/>
+		<context:exclude-filter expression="org.springframework.stereotype.Service" type="annotation"/>
+		<context:exclude-filter expression="org.springframework.stereotype.Repository" type="annotation"/>
+	</context:component-scan>
+	
+	<task:annotation-driven executor="AsyncExecutor" scheduler="SchedulerExecutor"/>
+	<task:executor id="AsyncExecutor" pool-size="100-1000" queue-capacity="1000" />
+	<task:scheduler id="SchedulerExecutor" pool-size="5" />
+	
+	<!-- For Pagination Tag -->
+	<bean class="egovframework.com.cmm.ImagePaginationRenderer" id="imageRenderer"/>
+	<bean class="egovframework.com.cmm.WebPcPaginationRenderer" id="webPcRenderer"/>
+	<bean class="egovframework.rte.ptl.mvc.tags.ui.pagination.DefaultPaginationManager" id="paginationManager">
+		<property name="rendererType">
+			<map>
+				<entry key="image" value-ref="imageRenderer"/>
+				<entry key="webpc" value-ref="webPcRenderer"/>
+			</map>
+		</property>
+	</bean>
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="webBindingInitializer">
+            <bean class="egovframework.com.cmm.web.EgovBindingInitializer"/>
+        </property>
+    </bean>
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"/>
+
+
+	<mvc:interceptors>
+	   <!--  <mvc:interceptor>
+	        <mvc:mapping path="/**/*.do" />
+	        <mvc:exclude-mapping path="/actionLogout.do" />
+	        <mvc:exclude-mapping path="/member/*.do" />
+	        <bean class= "egovframework.cms.com.interceptor.EgocCmsAlarmInterceptor">
+	            <property name="siteType" value="kkuApp"/>
+	        </bean>
+	    </mvc:interceptor>  -->
+	    
+	    	<!-- IP 정보 기록 및 로그인 체크가 필요한 URL과 로그인 여부를 체크해줄 인터셉터를 등록한다. -->
+		<mvc:interceptor>
+			<mvc:mapping path="/app/login.do" />
+			<!-- 사용자 로그인 로그를 기록해줄 인터셉터를 등록한다. -->
+			<bean class="egovframework.cms.com.interceptor.EgovCmsLoggingInterceptor">
+				<property name="logType" value="userLogin"/>
+			</bean>
+		</mvc:interceptor>
+	
+	
+		 <mvc:interceptor>
+			<mvc:mapping path="/*.do" />
+			<mvc:exclude-mapping path="/index.do" />
+			<mvc:exclude-mapping path="/member/*.do" />
+			<mvc:exclude-mapping path="/main.do" />
+			<mvc:exclude-mapping path="/reportView.do" />
+			<mvc:exclude-mapping path="/policy.do" />
+			<mvc:exclude-mapping path="/facilityLoginAction.do" />
+			<!-- 
+			<mvc:exclude-mapping path="/reportStatusUpdate.do" />
+			<mvc:exclude-mapping path="/campusReportList.do" />
+			<mvc:exclude-mapping path="/reportFixCommentAction.do " /> -->
+			<bean class="egovframework.cms.com.interceptor.EgovCmsAuthenticInterceptor">
+				<property name="siteType" value="kkucheckApp"/>
+			</bean>
+		</mvc:interceptor>
+		
+		<mvc:interceptor>
+			<mvc:mapping path="/admin/*.do" />
+			<mvc:exclude-mapping path="/admin/login.do" />
+			<mvc:exclude-mapping path="/admin/loginAction.do" />
+			<bean class="egovframework.cms.com.interceptor.EgovCmsAuthenticInterceptor">
+				<property name="siteType" value="kkuappAdmin"/>
+			</bean>
+		</mvc:interceptor>
+		
+		<mvc:interceptor>
+			<mvc:mapping path="/kpcceo/**/*.do" />
+			<mvc:exclude-mapping path="/kpcceo/login.do" />
+			<mvc:exclude-mapping path="/kpcceo/actionLogin.do" />
+			<bean class="egovframework.cms.com.interceptor.EgovCmsAuthenticInterceptor">
+				<property name="siteType" value="admin"/>
+			</bean>
+		</mvc:interceptor>
+	</mvc:interceptors>
+
+	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="defaultErrorView" value="egovframework/com/cmm/error/egovError"/>
+		<property name="exceptionMappings">
+			<props>
+				<prop key="org.springframework.dao.DataAccessException">egovframework/com/cmm/error/dataAccessFailure</prop>
+				<prop key="org.springframework.transaction.TransactionException">egovframework/com/cmm/error/dataAccessFailure</prop>
+				<prop key="egovframework.rte.fdl.cmmn.exception.EgovBizException">egovframework/com/cmm/error/egovBizException</prop>
+				<prop key="org.springframework.web.HttpSessionRequiredException">egovframework/com/uat/uia/EgovLoginUsr</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<!-- for JFile -->
+	<bean class="org.springframework.web.servlet.view.BeanNameViewResolver" p:order="0"/>
+
+	<bean class="org.springframework.web.servlet.view.UrlBasedViewResolver" p:order="1" p:prefix="/WEB-INF/jsp/" p:suffix=".jsp" p:viewClass="org.springframework.web.servlet.view.JstlView"/>
+
+	<!--  MULTIPART RESOLVERS -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="100000000" />
+		<property name="maxInMemorySize" value="100000000" />
+	</bean>
+	<mvc:default-servlet-handler />
+</beans>

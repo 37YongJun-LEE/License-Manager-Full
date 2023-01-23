@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="licenseApiDAO">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	
+	<insert id="licenseApiDAO.insertSubject" parameterClass="java.util.List">
+		 INSERT INTO KU_CERTIFICATION_SUBJECT( 
+			QUAL_CD, 
+			QUAL_NAME, 
+			SERIES_CD, 
+			SERIES_NAME, 
+			SUBJECT_CD, 
+			SUBJECT_NAME, 
+			JOBFIELD_CD, 
+			JOBFIELD_NAME, 
+			MJOBFIELD_CD, 
+			MJOBFIELD_NAME
+		)
+		VALUES 		
+		 <iterate conjunction=",">
+		(
+			#[].qualgbcd#, 
+			#[].qualgbnm#, 
+			#[].seriescd#, 
+			#[].seriesnm#, 
+			#[].jmcd#, 
+			#[].jmfldnm#, 
+			#[].obligfldcd#, 
+			#[].obligfldnm#, 
+			#[].mdobligfldcd#, 
+			#[].mdobligfldnm#
+			
+		)
+		</iterate>
+	</insert>
+	<insert id="licenseApiDAO.insertDate" parameterClass="java.util.List">
+		 INSERT INTO KU_CERTIFICATION_DATE( 
+		 	SUBJECT_CD,
+			TEST_YEAR, 
+			TEST_SEQ, 
+			QUAL_CD,
+			QUAL_NAME, 
+			DESCRIPTION, 
+			WTEST_APLC_STARTDT, 
+			WTEST_APLC_ENDDT, 
+			WTEST_STARTDT,
+			WTEST_ENDDT, 
+			WTEST_PASSDT, 
+			PTEST_APLC_STARTDT, 
+			PTEST_APLC_ENDDT, 
+			PTEST_STARTDT, 
+			PTEST_ENDDT, 
+			PTEST_PASSDT
+		)
+		VALUES 		
+		 <iterate conjunction=",">
+		(
+			#[].jmcd#,
+			#[].implYy#, 
+			#[].implSeq#, 
+			#[].qualgbCd#,
+			#[].qualgbNm#, 
+			#[].description#, 
+			#[].docRegStartDt#, 
+			#[].docRegEndDt#, 
+			#[].docExamStartDt#, 
+			#[].docExamEndDt#, 
+			#[].docPassDt#, 
+			#[].pracRegStartDt#, 
+			#[].pracRegEndDt#, 
+			#[].pracExamStartDt#, 
+			#[].pracExamEndDt#, 
+			#[].pracPassDt#
+			
+		)
+		</iterate>
+	</insert>
+	<insert id="licenseApiDAO.insertStatistics" parameterClass="java.util.List">
+		 INSERT INTO KU_CERTIFICATION_STATISTICS( 
+		 	ACQ_YEAR,
+			ACQ_MONTH, 
+			QUAL_CD, 
+			QUAL_NAME,
+			AREA_CD, 
+			AREA_NAME, 
+			AGE_CD, 
+			AGE_GROUP, 
+			GENDER_CD, 
+			GENDER, 
+			SERIES_CD, 
+			SERIES_NAME, 
+			SUBJECT_CD, 
+			SUBJECT_NAME, 
+			ACQ_NUM
+		)
+		VALUES 		
+		 <iterate conjunction=",">
+		(
+			#[].acquYy#,
+			#[].acquMm#, 
+			#[].qualgbCd#, 
+			#[].qualgbNm#,
+			#[].rgnCd#, 
+			#[].rgnNm#, 
+			#[].ageGrupCd#, 
+			#[].ageGrupNm#, 
+			#[].genderCd#, 
+			#[].genderNm#, 
+			#[].seriesCd#, 
+			#[].seriesNm#, 
+			#[].jmCd#, 
+			#[].jmNm#,
+			#[].acquCnt#
+			
+		)
+		</iterate>
+	</insert>
+	<insert id="licenseApiDAO.insertInterest" parameterClass="java.util.List">
+		 INSERT INTO KU_CERTIFICATION_INTEREST( 
+		 	INTEREST_CD,
+			SUBJECT_NAME, 
+			REC_MODDT, 
+			REC_SUBJECT_CD_ONE,
+			REC_SUBJECT_CD_TWO, 
+			REC_SUBJECT_NAME_ONE, 
+			REC_SUBJECT_NAME_TWO, 
+			REC_REGDT
+		)
+		VALUES 		
+		 <iterate conjunction=",">
+		(
+			#[].attenJmCd#,
+			#[].jmNm#, 
+			#[].modifyDttm#, 
+			#[].recomJmCd1#,
+			#[].recomJmCd2#, 
+			#[].recomJmNm1#, 
+			#[].recomJmNm2#, 
+			#[].regDttm#
+			
+		)
+		</iterate>
+	</insert>
+	
+	<insert id="licenseApiDAO.insertQuestion" parameterClass="java.util.List">
+		 INSERT INTO KU_CERTIFICATION_QUESTION( 
+		 	QUES_IDX,
+			QUES_TITLE, 
+			QUES_CONTENTS, 
+			QUES_REGDT,
+			QUES_MODDT, 
+			QUAL_CD, 
+			QUAL_NAME, 
+			SERIES_CD,
+			SERIES_NAME,
+			SUBJECT_CD,
+			SUBJECT_NAME,
+			QUES_FILE_NAME,
+			QUES_FILE_ORDER,
+			QUES_FILE_URL
+			
+		)
+		VALUES 		
+		 <iterate conjunction=",">
+		(
+			#[].artlSeq#,
+			#[].title#, 
+			#[].contents#, 
+			#[].regDttm#,
+			#[].modDttm#, 
+			#[].qualgbCd#, 
+			#[].qualgbNm#, 
+			#[].seriesCd#,
+			#[].seriesNm#, 
+			#[].jmCd#,
+			#[].jmNm#,
+			#[].fileNm#,
+			#[].fileSn#,
+			#[].fileUrl#
+			
+		)
+		</iterate>
+	</insert>
+	
+	<insert id="licenseApiDAO.insertQues">
+		INSERT INTO KU_CERTIFICATION_QUESTION( 
+			 	QUES_IDX,
+				QUES_TITLE, 
+				QUES_CONTENTS, 
+				QUES_REGDT,
+				QUES_MODDT, 
+				QUAL_CD, 
+				QUAL_NAME, 
+				SERIES_CD,
+				SERIES_NAME,
+				SUBJECT_CD,
+				SUBJECT_NAME,
+				QUES_FILE_NAME,
+				QUES_FILE_ORDER,
+				QUES_FILE_URL
+				
+			)
+			VALUES (
+				#artlSeq#,
+				#title#, 
+				#contents#, 
+				#regDttm#,
+				#modDttm#, 
+				#qualgbCd#, 
+				#qualgbNm#, 
+				#seriesCd#,
+				#seriesNm#, 
+				#jmCd#,
+				#jmNm#,
+				#fileNm#,
+				#fileSn#,
+				#fileUrl#
+			)
+		
+	</insert>
+	
+	<insert id="licenseApiDAO.insertQualify" parameterClass="java.util.List">
+		 INSERT INTO KU_CERTIFICATION_QUALIFY( 
+		 	EMQUAL_CD,
+			EMQUAL_DESCRIPTION, 
+			GROUP_CD, 
+			GROUP_NAME,
+			QUAL_CD, 
+			QUAL_NAME
+			
+		)
+		VALUES 		
+		 <iterate conjunction=",">
+		(
+			#[].emqualCd#,
+			#[].emqualDispNm#, 
+			#[].grdCd#, 
+			#[].grdNm#,
+			#[].qualgbCd#, 
+			#[].qualgbNm#
+			
+		)
+		</iterate>
+	</insert>
+</sqlMap>

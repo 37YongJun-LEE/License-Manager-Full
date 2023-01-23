@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="timetableDAO">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  	<typeAlias  alias="EgovKkuReportVO" type="egovframework.kku.usr.service.EgovKkuReportVO"/>
+	
+  	<insert id="reportDAO.insertReportBoard">
+		INSERT INTO KU_REPORT_LIST
+			(REPORTER_IDX, WRITER_IDX, CONTENT, REPORT_TBL_CODE, REPORT_BOARD_IDX)
+		VALUES
+			 (#reporterIdx#, #writerIdx#, #content#, #reportTblCode#, #reportBoardIdx#)
+	</insert>
+
+</sqlMap>

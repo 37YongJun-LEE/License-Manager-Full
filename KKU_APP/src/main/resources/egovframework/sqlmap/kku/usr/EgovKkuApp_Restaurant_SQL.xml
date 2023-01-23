@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="restaurantDAO">
+	<typeAlias alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  	<typeAlias alias="restaurantVO" type="egovframework.kku.usr.service.EgovKkuAppCommunitySchoolInfoRestaurantVO"/>
+
+	<select id="restaurantDAO.selectBoardList" resultClass="egovMap">
+		SELECT 
+			*,
+			(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_IDX = k.REST_IDX AND FILE_DEL_YN = "N") AS FILE_CNT,
+			(SELECT FILE_SRV_FILE FROM KU_FILE WHERE FILE_TBL_IDX = k.REST_IDX AND FILE_DEL_YN = "N" AND FILE_TBL_CODE = '4' ORDER BY FILE_IDX ASC LIMIT 1) AS FIRST
+		FROM 
+			KU_RESTAURANT AS k
+		<isEmpty property="restMenucategory" >
+			<isNotEmpty prepend="WHERE" property="searchKeyword">
+				REST_NAME LIKE CONCAT('%', #searchKeyword# , '%')
+			</isNotEmpty>
+		</isEmpty>
+		<isNotEmpty prepend="WHERE" property="restMenucategory" >
+			REST_MENUCATEGORY = #restMenucategory#
+			<isNotEmpty prepend="AND" property="searchKeyword">
+				REST_NAME LIKE CONCAT('%', #searchKeyword# , '%')
+			</isNotEmpty>
+		</isNotEmpty>
+		ORDER BY k.REST_IDX DESC
+		LIMIT 
+			#firstIndex#,#pageUnit#
+	</select>
+
+	<select id="restaurantDAO.selectBoardListCnt" resultClass="int">
+		SELECT
+			COUNT(*)
+		FROM
+			KU_RESTAURANT
+		<isEmpty property="restMenucategory" >
+			<isNotEmpty prepend="WHERE" property="searchKeyword">
+				REST_NAME LIKE CONCAT('%', #searchKeyword# , '%')
+			</isNotEmpty>
+		</isEmpty>
+		<isNotEmpty prepend="WHERE" property="restMenucategory" >
+			REST_MENUCATEGORY = #restMenucategory#
+			<isNotEmpty prepend="AND" property="searchKeyword">
+				REST_NAME LIKE CONCAT('%', #searchKeyword# , '%')
+			</isNotEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<select id="restaurantDAO.selectBoardByIdx" resultClass="egovMap">
+		SELECT 
+			* 
+		FROM
+			KU_RESTAURANT AS k
+		WHERE
+			k.REST_IDX = #restIdx#
+	</select>
+	
+	<select id="restaurantDAO.restaurantFileList" resultClass="egovMap">
+		SELECT 
+			*
+		FROM
+			KU_FILE
+		WHERE
+			FILE_TBL_IDX = #restIdx#
+		AND
+			FILE_TBL_CODE = 4
+		AND
+			FILE_DEL_YN = 'N'
+	</select>
+	<select id="restaurantDAO.selectMenuListByRestIdx" resultClass="egovMap">
+	    SELECT
+	    	REST_IDX
+	    	, MENU_IDX
+	    	, MENU_NAME
+	    	, MENU_DESC
+	    	, FORMAT(MENU_PRICE, '##,##0') as MENU_PRICE
+	    	, ADD_MENU
+	    	, ADD_MENU_PRICE
+	    	, MAIN_YN
+	    FROM 
+	    	KU_RESTAURANT_MENU
+	    WHERE
+	    	REST_IDX = #restIdx#
+	    AND
+	    	SHOW_YN = 'Y'
+	    
+	</select>
+	
+		<select id="restaurantDAO.selectMenuListByRestMenuIdx" resultClass="egovMap">
+	    SELECT
+	    	REST_IDX
+	    	, (SELECT REST_NAME FROM KU_RESTAURANT WHERE REST_IDX = #restIdx#) REST_NAME
+	    	, MENU_IDX
+	    	, MENU_NAME
+	    	, MENU_DESC
+	    	, FORMAT(MENU_PRICE, '##,##0') as MENU_PRICE
+	    	, ADD_MENU
+	    	, ADD_MENU_PRICE
+	    	, MAIN_YN
+	    FROM 
+	    	KU_RESTAURANT_MENU
+	    WHERE
+	    	REST_IDX = #restIdx#
+	    AND
+	    	MENU_IDX = #menuIdx#
+	    AND
+	    	SHOW_YN = 'Y'
+	    
+	</select>
+	<insert id="restaurantDAO.insertMenuCart">
+	    INSERT INTO
+	    	KU_RESTAURANT_BASKET(
+	    		REST_IDX
+	    		, REST_NAME
+	    		, MENU_IDX
+	    		, MENU_NAME
+	    		, MENU_DESC
+	    		, ADD_MENU
+	    		, ADD_MENU_PRICE
+	    		, MENU_CNT
+	    		, MENU_PRICE
+	    		, MENU_TOTAL_PRICE
+	    		, REG_IDX
+	    		, REG_DATE
+	    	)
+	    VALUES(
+	    	#restIdx#
+	    	, #restName#
+	    	, #menuIdx#
+	    	, #menuName#
+	    	, #menuDesc#
+	    	, #addMenu#
+	    	, #addMenuPrice#
+	    	, #menuCnt#
+	    	, #menuPrice#
+	    	, #menuTotalPrice#
+	    	, #regIdx#
+	    	, sysdate()
+	    )	
+	    
+	</insert>
+	<select id="restaurantDAO.selectMyCartListByRegIdx" resultClass="egovMap">
+		select 
+			krb.BASKET_IDX
+			, krb.MENU_IDX
+			, krb.MENU_NAME 
+			, krb.MENU_DESC 
+			, krb.MENU_PRICE 
+			, krb.MENU_CNT 
+			, krb.MENU_TOTAL_PRICE 
+			, krb.ADD_MENU 
+			, krb.ADD_MENU_PRICE
+			, krm.FIL_PATH 
+			, krm.FIL_SRVNAME 
+			, krm.FIL_USRNAME 
+			, (select kr.REST_NAME from KU_RESTAURANT kr where kr.REST_IDX = krb.REST_IDX) as REST_NAME
+			, krb.REST_IDX
+		from 
+			KU_RESTAURANT_BASKET krb 
+		inner join 
+			KU_RESTAURANT_MENU krm 
+		on 
+			krm.MENU_IDX = krb.MENU_IDX 
+		where 
+			krb.REG_IDX = #regIdx#
+	    
+	</select>
+	<select id="restaurantDAO.selectMenuCart" resultClass="egovMap">
+		SELECT 
+			krb.REST_IDX
+			, krb.MENU_NAME
+			, krb.ADD_MENU
+		FROM 
+			KU_RESTAURANT_BASKET krb 
+		where 
+			krb.REG_IDX = #regIdx#
+
+	</select>
+	<update id="restaurantDAO.updateMenuCart">
+		UPDATE 
+			KU_RESTAURANT_BASKET
+		SET 
+			MENU_CNT = MENU_CNT + #menuCnt#,
+			MENU_TOTAL_PRICE = MENU_CNT * (MENU_PRICE + ADD_MENU_PRICE)
+		WHERE
+			REG_IDX = #regIdx#
+		AND
+	    	MENU_IDX = #menuIdx#
+	    AND
+	    	ADD_MENU = #addMenu#
+	</update>
+	
+	<delete id="restaurantDAO.deleteMenuCart">
+		DELETE FROM
+			KU_RESTAURANT_BASKET
+		WHERE
+			REG_IDX = #regIdx#
+	</delete>
+	
+	<delete id="restaurantDAO.deleteMenuCartByBasketIdx">
+		DELETE FROM
+			KU_RESTAURANT_BASKET
+		WHERE
+			BASKET_IDX = #basketIdx#
+	</delete>
+	
+	<insert id="restaurantDAO.insertOrderInfo">
+	    INSERT INTO
+	    	KU_RESTAURANT_ORDER_INFO(
+ 	    		ORDER_NUM
+	    		, REST_IDX
+	    		, REST_NAME 
+ 	    		, MENU_TOTAL_PRICE
+	    		, DELIVERY_METHOD
+	    		, DISPOSABLE_YN
+	    		, ORDER_REQUEST_DES
+	    		, ADDRESS
+	    		, ADDRESS_DETAILED
+	    		, PAY_PRICE
+	    		, PAY_OPTION
+	    		, ORDER_STATE 
+	    		, REG_IDX
+	    		, REG_DATE
+	    	)
+	    VALUES(
+	    	 #orderNum# 
+ 	    	, #restIdx#
+	    	, #restName# 
+	    	, #menuTotalPrice#
+	    	, #deliveryMethod#
+	    	, #disposableYn#
+	    	, #orderRequestDes#
+	    	, #address#
+	    	, #addressDetailed#
+	    	, #payPrice#
+	    	, #payOption#
+	    	, #orderState# 
+	    	, #regIdx#
+	    	, now()
+	    )	
+	    
+	</insert>
+	
+	<insert id="restaurantDAO.insertOrderMenu">
+	    INSERT INTO
+	    	KU_RESTAURANT_ORDER_MENU(
+ 	    		ORDER_NUM
+	    		, REST_IDX
+	    		, REST_NAME 
+	    		, MENU_IDX
+	    		, MENU_NAME
+	    		, ADD_MENU
+	    		, ADD_MENU_PRICE
+	    		, MENU_CNT
+	    		, MENU_PRICE
+ 	    		, MENU_TOTAL_PRICE
+	    		, REG_IDX
+	    		, REG_DATE
+	    	)
+	    VALUES(
+	    	 #orderNum# 
+ 	    	, #restIdx#
+	    	, #restName# 
+	    	, #menuIdx#
+	    	, #menuName#
+	    	, #addMenu#
+	    	, #addMenuPrice#
+	    	, #menuCnt#
+	    	, #menuPrice#      
+	    	, MENU_CNT * (MENU_PRICE + ADD_MENU_PRICE)
+	    	, #regIdx#
+	    	, now()
+	    )	
+	    
+	</insert>
+	<select id="restaurantDAO.selectOrderListByRegIdx" resultClass="egovMap">
+		SELECT 
+			kroi.ORDER_INFO_IDX
+			, kroi.ORDER_NUM
+			, kroi.REST_IDX
+			, kroi.REST_NAME
+			, kroi.DELIVERY_METHOD
+			, kroi.ORDER_STATE
+			, kroi.REG_DATE
+		FROM 
+			KU_RESTAURANT_ORDER_INFO kroi
+		WHERE 
+			kroi.REG_IDX = #regIdx#
+		ORDER BY kroi.ORDER_INFO_IDX DESC
+
+	</select>
+	<select id="restaurantDAO.selectOrderInfoByOrderInfoIdx" resultClass="egovMap">
+		SELECT 
+			*
+		FROM 
+			KU_RESTAURANT_ORDER_INFO
+		WHERE 
+			REG_IDX = #regIdx#
+		AND
+			ORDER_INFO_IDX = #orderInfoIdx#
+	</select>
+	<select id="restaurantDAO.selectOrderMenuListByOrderNum" resultClass="egovMap">
+ 		SELECT DISTINCT
+			om.ORDER_MENU_IDX
+			, om.ORDER_NUM
+			, om.MENU_IDX
+			, om.MENU_NAME
+			, om.ADD_MENU
+			, om.ADD_MENU_PRICE
+			, om.MENU_CNT
+			, om.MENU_PRICE
+			, om.MENU_TOTAL_PRICE
+		FROM 
+			KU_RESTAURANT_ORDER_INFO oi, KU_RESTAURANT_ORDER_MENU om
+		WHERE 
+			om.ORDER_NUM = (select oi.ORDER_NUM from KU_RESTAURANT_ORDER_INFO oi where oi.ORDER_INFO_IDX = #orderInfoIdx#)
+		AND
+			oi.REG_IDX = #regIdx#
+		AND
+			oi.REG_IDX = om.REG_IDX
+		AND 
+			date_format(oi.REG_DATE, "%Y%m%d") = date_format(om.REG_DATE, "%Y%m%d")
+	</select>
+	<delete id="restaurantDAO.deleteOrderByOrderInfoIdx">
+		DELETE FROM
+			KU_RESTAURANT_ORDER_INFO
+		WHERE
+			ORDER_INFO_IDX = #orderInfoIdx#
+	</delete>
+</sqlMap>

@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="kkucommunityDAO">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+    <typeAlias  alias="boardVO" type="egovframework.kku.adm.service.EgovKkuAdmCommunityBoardVO"/>
+    
+	<resultMap id="boardMap" class="egovframework.kku.adm.service.EgovKkuAdmCommunityBoardVO">
+		<result property="trdIdx" column="TRD_IDX"/>
+		<result property="trdWriter" column="TRD_WRITER"/>
+		<result property="trdTitle" column="TRD_TITLE"/>
+    	<result property="trdContent" column="TRD_CONTENT"/>
+    	<result property="trdPrice" column="TRD_PRICE"/>
+    	<result property="trdViewnum" column="TRD_VIEWNUM"/>
+	</resultMap>
+
+
+
+
+	<select id="kkucommunityDAO.selectBoardList"  resultClass="egovMap">
+	
+	
+		SELECT
+			kt.*,
+			(SELECT COUNT(*) FROM kku_app.KU_LIKE WHERE TRD_IDX = kt.TRD_IDX) AS LIKE_CNT,
+			(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_IDX = kt.TRD_IDX AND FILE_DEL_YN = "N" AND FILE_TBL_CODE = #fileTblCode#) AS FILE_CNT,
+			(SELECT FILE_SRV_FILE FROM KU_FILE WHERE FILE_TBL_IDX = kt.TRD_IDX AND FILE_TBL_CODE = '0' AND FILE_DEL_YN = "N" ORDER BY FILE_IDX ASC LIMIT 1) AS FIRST,
+			(SELECT USR_NICKNAME FROM KU_USER WHERE USR_IDX = kt.TRD_USR_IDX) AS REAL_NICKNAME
+		FROM 
+			KU_TRADE AS kt
+		WHERE
+			NOT TRD_STATUS = '0'
+
+	    <isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="trdTitle">
+				kt.TRD_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="trdContent">
+				kt.TRD_CONTENT LIKE CONCAT('%', #searchKeyword#, '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="">
+				kt.TRD_IDX IN((SELECT TRD_IDX FROM KU_TRADE 
+									WHERE 
+										TRD_TITLE LIKE  CONCAT('%', #searchKeyword# , '%') 
+									OR
+										TRD_CONTENT LIKE CONCAT('%', #searchKeyword# , '%')
+				 ))
+				
+			</isEqual>
+		</isNotEmpty>	
+ 
+		ORDER BY
+			TRD_WRITEDATE DESC
+		LIMIT 
+			#firstIndex#,#pageUnit#
+	</select>
+	
+	
+	
+	<select id="kkucommunityDAO.selectMyBoardList"  resultClass="egovMap">
+	
+	
+		SELECT
+			kt.*,
+			(SELECT COUNT(*) FROM kku_app.KU_LIKE WHERE TRD_IDX = kt.TRD_IDX) AS LIKE_CNT,
+			(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_IDX = kt.TRD_IDX AND FILE_DEL_YN = "N") AS FILE_CNT,
+			(SELECT FILE_SRV_FILE FROM KU_FILE WHERE FILE_TBL_IDX = kt.TRD_IDX AND FILE_DEL_YN = "N" ORDER BY FILE_IDX ASC LIMIT 1) AS FIRST
+		FROM 
+			KU_TRADE AS kt
+		WHERE
+			NOT TRD_STATUS = '0'
+		AND
+			TRD_USR_IDX = #trdUsrIdx#
+		ORDER BY
+			TRD_WRITEDATE DESC
+	</select>
+	
+	<select id="kkucommunityDAO.selectLikeBoardList"  resultClass="egovMap">
+	
+	
+		SELECT
+			kt.*,
+			(SELECT COUNT(*) FROM kku_app.KU_LIKE WHERE TRD_IDX = kt.TRD_IDX) AS LIKE_CNT,
+			(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_IDX = kt.TRD_IDX AND FILE_DEL_YN = "N") AS FILE_CNT,
+			(SELECT FILE_SRV_FILE FROM KU_FILE WHERE FILE_TBL_IDX = kt.TRD_IDX AND FILE_DEL_YN = "N" ORDER BY FILE_IDX ASC LIMIT 1) AS FIRST
+		FROM 
+			KU_TRADE AS kt
+		WHERE
+			TRD_IDX IN (SELECT TRD_IDX FROM KU_LIKE WHERE USR_IDX = #usrIdx# AND TBL_CODE = '0')
+		AND
+			NOT TRD_STATUS = '0'
+		ORDER BY
+			TRD_WRITEDATE DESC
+	</select>
+	
+	<select id="kkucommunityDAO.likeList" resultClass="int">
+		SELECT TRD_IDX FROM KU_LIKE WHERE USR_IDX = #usrIdx# AND TBL_CODE = '0';
+	</select>
+	
+	<select id="kkucommunityDAO.selectBoardListCnt"  resultClass="int">
+		SELECT
+			COUNT(*)
+		FROM
+			KU_TRADE
+		WHERE
+			NOT TRD_STATUS = '0'
+	    <isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="trdTitle">
+				TRD_TITLE LIKE LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="trdContent">
+				TRD_CONTENT LIKE CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="">
+				TRD_IDX IN((SELECT TRD_IDX FROM KU_TRADE 
+									WHERE 
+										TRD_TITLE LIKE  CONCAT('%', #searchKeyword# , '%') 
+									OR
+										TRD_CONTENT LIKE CONCAT('%', #searchKeyword# , '%')
+				 ))
+			</isEqual>
+		</isNotEmpty>
+	</select>
+
+
+	<select id="kkucommunityDAO.selectBoardByIdx" resultClass="egovMap">
+
+		SELECT 
+			kt.*,
+			(SELECT COUNT(*) FROM KU_LIKE WHERE TRD_IDX = kt.TRD_IDX) AS LIKE_CNT,
+			(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_IDX = kt.TRD_IDX AND FILE_DEL_YN = "N") AS FILE_CNT,
+			(SELECT USR_SRVPROFILEPIC FROM KU_USER WHERE USR_IDX = kt.TRD_USR_IDX) AS PROFILE,
+			(SELECT USR_NICKNAME FROM KU_USER WHERE USR_IDX = kt.TRD_USR_IDX) AS REAL_NICKNAME
+		FROM
+			KU_TRADE AS kt
+		WHERE
+			NOT TRD_STATUS = '0'
+		AND
+			kt.TRD_IDX = #trdIdx#
+		
+	</select>
+	
+	
+	<update id="kkucommunityDAO.updateBoard">
+		UPDATE 
+			KU_TRADE
+	    SET
+			TRD_TITLE = #trdTitle#,
+			TRD_CONTENT = #trdContent#,
+			TRD_PRICE = #trdPrice#,
+			TRD_MODDATE = NOW()
+		WHERE
+			TRD_IDX = #trdIdx#
+	</update>
+	
+	<update id="kkucommunityDAO.deleteBoard">
+		UPDATE 
+			KU_TRADE
+	    SET
+			TRD_STATUS   = '0',
+			TRD_MODDATE = NOW()
+		WHERE
+			TRD_IDX = #trdIdx#
+	</update>
+	
+	<update id="kkucommunityDAO.staUpdateBoard">
+		UPDATE 
+			KU_TRADE
+	    SET
+			TRD_STATUS   = #trdStatus#,
+			TRD_MODDATE = NOW()
+		WHERE
+			TRD_IDX = #trdIdx#
+	</update>
+	
+	<insert id="kkucommunityDAO.insertBoard">
+		INSERT INTO KU_TRADE (
+		    TRD_WRITER,
+		    TRD_USRNICK,
+		    TRD_USR_IDX,
+		    TRD_TITLE,
+		    TRD_CONTENT,
+		    TRD_PRICE,
+		    TRD_STATUS,
+		    TRD_WRITEDATE
+		) VALUES (
+		    #trdWriter#,
+		    #trdUsrnick#,
+			#trdUsrIdx#,
+			#trdTitle#,
+		    #trdContent#,
+		    #trdPrice#,
+		    '1',
+			NOW()
+		)
+		<selectKey keyProperty="trdIdx" resultClass="String">
+			SELECT @@IDENTITY
+		</selectKey>	
+	</insert>
+	
+	<select id="kkucommunityDAO.boardFileList" resultClass="egovMap">
+		SELECT 
+			*
+		FROM
+			KU_FILE
+		WHERE
+			FILE_TBL_IDX = #trdIdx#
+		AND
+			FILE_TBL_CODE = 0
+		AND
+			FILE_DEL_YN = 'N'
+	</select>	
+	
+	<insert id="kkucommunityDAO.insertBoardFile">
+		INSERT INTO KU_FILE(
+		    FILE_TBL_IDX,
+		    FILE_TBL_CODE,
+		    FILE_USR_FILE,
+		    FILE_SRV_FILE,
+		    FILE_DEL_YN,
+		    FILE_REG_IDX,
+		    FILE_REG_NICK,
+		    FILE_MOD_DATE,
+		    BF_TYPE
+		) VALUES (
+			#fileTblIdx#,
+			0,
+		    #fileUsrFile#,
+		    #fileSrvFile#,
+		    'N',
+		    #fileRegIdx#,
+		    #fileRegNick#,
+			NOW(),
+			#bfType#
+		)
+	</insert>
+	
+	<update id="kkucommunityDAO.deleteBoardFile">
+		UPDATE 
+			KU_FILE
+	    SET
+			FILE_DEL_YN = 'Y',
+			MOD_IDX  = #modIdx#,
+			MOD_NAME = #modName#,
+			FILE_MOD_DATE = NOW()
+		WHERE
+			FILE_IDX = #fileIdx#
+	</update>
+	
+	
+	<insert id="kkucommunityDAO.insertLike">
+		INSERT INTO KU_LIKE(
+		    TBL_CODE,
+		    TRD_IDX,
+		    USR_IDX
+		) VALUES (
+			0,
+			#trdIdx#,
+			#usrIdx#
+		)
+	</insert>
+
+	<delete id="kkucommunityDAO.deleteLike">
+		DELETE FROM
+			KU_LIKE
+		WHERE
+			TRD_IDX = #trdIdx#
+		AND
+			USR_IDX = #usrIdx#
+	</delete>	
+
+	<!-- 현재 테이블에 좋아요를 눌렀는지 구분하는 쿼리  -->
+	<select id="kkucommunityDAO.selectLike" resultClass="int">
+		SELECT 
+			count(*)
+		FROM
+			KU_LIKE
+		WHERE
+			TRD_IDX = #trdIdx#
+		AND
+			TBL_CODE = 0
+		AND
+			USR_IDX = #usrIdx#
+	</select>	
+
+
+</sqlMap>

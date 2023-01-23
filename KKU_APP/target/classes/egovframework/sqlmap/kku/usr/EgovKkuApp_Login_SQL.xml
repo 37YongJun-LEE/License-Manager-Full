@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="signUpDAO">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  
+    <typeAlias alias="kkuUserVO" type="egovframework.kku.usr.service.EgovKkuAppUserVO"/>
+
+   	<select id="kkuUserDAO.chkDuplicateNick" resultClass="java.lang.Integer">
+		SELECT 
+			COUNT(*) TOTAL 
+		FROM 
+			KU_USER 
+		WHERE 
+			USR_NICKNAME = #nickName#
+	</select>
+
+
+   	<insert id="kkuUserDAO.memberInsert">
+   	    INSERT INTO KU_USER (
+   	    	USR_EMAIL, USR_NICKNAME, USR_NAME, PHONE_NUMBER ,USR_PASSWORD, USR_STDNUM, USR_DEPARTMENT, USR_MAJOR,  USR_RANK, NICK_CHANGEDATE, SIGNUP_DATE, PROMOTION_YN, USR_GENDER, USR_DELETEYN, LOGIN_CNT
+   	    ) VALUES(
+   	    	#usrEmail#, #usrNickname#, #usrName#, #phoneNumber#, #usrPassword#, #usrStdnum#, #usrDepartment#, #usrMajor#, #usrRank#,  sysdate(), sysdate(), #promotionYn#, #usrGender#, #usrDeleteyn#, 0
+   	    )
+   	</insert>
+   	<!-- USR_GENDER, USR_TIMETABLE,  #usrGender#, #usrTimeTable#-->
+
+   	
+
+   	<select id="kkuUserDAO.findOptionDetail" resultClass="egovMap">
+		SELECT 
+				idx, 
+				UNI_DEPARTMENT,
+				UNI_MAJOR
+		FROM kku_app.KU_UNI
+		where UNI_DEPARTMENT = #option#
+	</select>
+	
+	<select id="kkuUserDAO.chkDuplicateUser" resultClass="java.lang.Integer">
+		SELECT 
+			COUNT(*) TOTAL 
+		FROM 
+			KU_USER 
+		WHERE 
+			USR_EMAIL = #usrEmail#
+	</select>
+	
+	<select id="kkuUserDAO.Login"  resultClass="java.lang.Integer">
+       		SELECT 
+       			COUNT(*) loginTotal
+       		FROM
+       			KU_USER
+       		WHERE USR_EMAIL = #usrEmail# AND USR_DELETEYN = "N" AND USR_PASSWORD = #usrPassword#
+   </select>
+
+  	<select id="kkuUserDAO.selectUser"  resultClass="egovMap">
+		SELECT 
+			*
+		FROM 
+			KU_USER
+		WHERE
+			USR_EMAIL = #usrEmail#
+		OR
+			USR_IDX = #usrIdx#
+	</select>
+	
+	<select id="kkuUserDAO.selectByDeviceId"  resultClass="egovMap">
+		SELECT 
+			*
+		FROM 
+			KU_USER
+		WHERE
+			DEVICE_ID = #deviceId#
+	</select>
+	<select id="kkuUserDAO.selectFriendStatus" resultClass="java.lang.String">
+	    SELECT 
+	    	FRIEND_STATUS
+	    FROM 
+	    	KU_FRIEND
+	    WHERE 
+	   	 	FRIEND_MYID = #friendMyid# AND FRIEND_FID = #friendFid#
+	    
+	</select>
+	<select id="kkuUserDAO.selectUserDevice" resultClass= "egovMap">
+	     SELECT 
+			U.* ,
+		    if((SELECT REGISTRATION_ID FROM KU_DEVICE WHERE DEVICE_ID = U.DEVICE_ID) IS NOT NULL ,
+			    (SELECT REGISTRATION_ID FROM KU_DEVICE WHERE DEVICE_ID = U.DEVICE_ID) ,
+		        ''
+			) AS REGISTRATION_ID,
+			kd.OS 
+		FROM 
+			KU_USER AS U inner join KU_DEVICE kd 
+		ON 
+			U.DEVICE_ID  = kd.DEVICE_ID 
+		WHERE
+			U.USR_EMAIL = #usrEmail#
+		or
+			U.USR_IDX = #usrIdx#
+	</select>
+  	<update id="kkuUserDAO.usrPassUpdate">
+  	    UPDATE 
+  	    	KU_USER 
+  	    SET 
+  	    	USR_PASSWORD = #usrPassword#
+  	    WHERE
+  	    	USR_EMAIL = #usrEmail#
+  	   
+  	</update>
+  	
+  	<select id="kkuUserDAO.selectUsrInfoByUsrIdx"  resultClass="egovMap">
+		SELECT 
+			USR_MAJOR, USR_RANK, USR_NICKNAME
+		FROM
+			KU_USER
+		WHERE
+			USR_IDX = #usrIdx#
+	</select>
+	
+	<select id="kkuUserDAO.selectAdminUserInfo" resultClass="egovMap">
+		SELECT 
+			USR_EMAIL
+		FROM
+			KU_USER
+		WHERE
+			USR_RANK = "2" AND USR_MAJOR = #usrMajor#
+	</select>
+	
+  	<select id="kkuUserDAO.deviceCnt" resultClass="java.lang.Integer">
+		SELECT
+			COUNT(*)
+		FROM
+			KU_DEVICE
+		WHERE
+			DEVICE_ID = #deviceId#
+	</select>
+	
+	<insert id="kkuUserDAO.insertDevice">
+		INSERT INTO KU_DEVICE (
+			DEVICE_ID,
+			REGISTRATION_ID,
+			PHONE_NUMBER,
+			OS,
+			APP_VERSION,
+			PUSH_YN,
+			NOTICE_YN,
+			BOARD_YN,
+			MESSAGE_YN,
+			COMMENT_YN,
+			REG_IP,
+			REG_DATE 
+		) VALUES (
+			#deviceId#, 
+			#registrationId#,
+			#phoneNumber#,
+			#os#,
+			#appVersion#,
+			'Y', 
+			'Y', 
+			'Y', 
+			'Y', 
+			'Y'	, 
+			#regIp#, 
+			now()
+		)
+	</insert>
+	
+	<update id="kkuUserDAO.updateDevice">
+		UPDATE 
+			KU_DEVICE
+	    SET
+			DEVICE_ID         =	#deviceId#, 
+			REGISTRATION_ID   = #registrationId#,
+			PHONE_NUMBER      = #phoneNumber#,
+			OS                = #os#,
+			APP_VERSION       = #appVersion#,
+			MOD_IP            = #modIp#,
+			MOD_DATE          = now()
+		WHERE
+			DEVICE_ID = #deviceId#
+	</update>
+	
+	<update id="kkuUserDAO.updateDeviceUser">
+	    UPDATE
+	    	KU_USER
+	    SET
+	    	DEVICE_ID =  #deviceId#
+	    WHERE
+	    	USR_EMAIL = #usrEmail#
+	</update>
+	
+	<select id="kkuUserDAO.findOptionDetailAll" resultClass="egovMap">
+		SELECT 
+				idx, 
+				UNI_DEPARTMENT, 
+				UNI_MAJOR
+		FROM kku_app.KU_UNI
+		ORDER BY UNI_MAJOR ASC
+	</select>
+	<insert id="kkuUserDAO.insertReport">
+	    INSERT INTO KU_FACILITYREPORT (
+	    	REPORT_CONTENT,
+	    	REPORTER_PNUM,
+	    	REPORTER_ID,
+	    	PROCESS_STATE,
+	    	REPORT_DATE
+	    )
+	    VALUES (
+	    	#reportContent#,
+	    	#reporterPnum#,
+	    	#reporterId#,
+	    	#processState#,
+	    	sysdate()
+	    )
+	    <selectKey keyProperty="reportIdx" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY
+		</selectKey>	
+	</insert>
+	
+	<insert id="kkuUserDAO.insertSms">
+	    INSERT INTO KU_SMS (
+	    	TRAN_PHONE,
+	    	TRAN_CALLBACK,
+	    	TRAN_DATE,
+	    	TRAN_MSG,
+	    	TRAN_ID
+	    )
+	    VALUES (
+	    	#tran_phone#,
+	    	#tran_callback#,
+	    	sysdate(),
+	    	#tran_msg#,
+	    	#tran_id#
+	    )
+	</insert>
+	<select id="kkuUserDAO.showReportList" resultClass="egovMap">
+	    SELECT
+			*,
+			ku.USR_NAME
+		FROM
+			KU_FACILITYREPORT as f
+		inner join KU_USER as ku 
+				on
+			f.REPORTER_ID = ku.USR_EMAIL
+		WHERE 
+			f.REPORT_DELETEYN = "1"
+		order by
+			f.REPORT_DATE DESC,
+			f.REPORT_IDX DESC
+	</select>
+	
+	<select id="kkuUserDAO.showReportListDetail" resultClass="egovMap">
+	     select *,(case 
+			when 
+				FIX_COMMENT IS NULL then 'Isnull'
+				ELSE 'Notnull'
+			end )as FIX_COMMENTTYPE
+		from KU_FACILITYREPORT kf where kf.REPORT_IDX = #reportIdx#
+	</select>
+
+	<select id="kkuUserDAO.selectFacilityFix" resultClass="egovMap">
+		SELECT
+	    	*
+	    FROM 
+	    	KU_FACILITYREPORT
+	    WHERE 
+	    	REPORTER_ID = #reporterId#
+	    ORDER BY REPORT_DATE DESC, REPORT_IDX DESC 
+	    
+	</select>
+	<update id="kkuUserDAO.updateFacilityFixComment">
+	    UPDATE 
+	    	KU_FACILITYREPORT
+	    SET 
+	    	FIX_COMMENT = #fixComment#,
+	    	COMMENT_WRITER = #commentWriter#,
+	    	PROCESS_STATE = #processState#
+	    WHERE
+	    	REPORT_IDX = #reportIdx#
+	</update>
+	<select id="kkuUserDAO.facLoginCheck" resultClass="java.lang.Integer">
+	    SELECT
+	    	COUNT(*)
+	    FROM 
+	    	KU_USER
+	    WHERE 
+	    	USR_EMAIL = #loginName# AND USR_RANK = 100
+	    
+	</select>
+	<update id="kkuUserDAO.updateFacilityProcess">
+	    UPDATE KU_FACILITYREPORT
+	    SET
+	    	PROCESS_STATE = #processState# ,
+	    	MOD_DATE = sysdate() ,
+	    	READ_YN = #readYn#
+	    WHERE
+	    	REPORT_IDX = #reportIdx#
+	</update>
+	
+	<select id="kkuUserDAO.getProcessState" resultClass="java.lang.Integer">
+	    select PROCESS_STATE
+	    FROM KU_FACILITYREPORT
+	    WHERE REPORT_IDX = #reportIdx#
+	</select>
+	<insert id="kkuUserDAO.insertEmailLog">
+	    INSERT INTO
+	    	KU_EMAIL_LOG
+				(USR_EMAIL,ELOG_CONTENT,REG_DATE,ELOG_TYPE)
+			VALUES
+				(#receiverAddress#,#elogContent#,sysdate(),#elogType#)
+	     <selectKey keyProperty="elogContent" resultClass="String">
+			SELECT @@IDENTITY
+		</selectKey>
+	</insert>
+	 <select id="kkuUserDAO.selectUserByDeviceId" resultClass="egovMap">
+	     SELECT
+	     	USR_IDX
+	    	, USR_EMAIL
+	     	, USR_PASSWORD
+	     FROM 
+	     	KU_USER
+	     WHERE
+	     	DEVICE_ID=#deviceId#
+	     
+	 </select>
+	 
+	 <update id="kkuUserDAO.userLoginUpdate">
+	     UPDATE
+	     	KU_USER
+	     SET
+	     	LAST_LOGIN_DATE = sysdate()
+	     	, LOGIN_CNT = LOGIN_CNT + 1
+		 WHERE
+		 	USR_IDX = #usrIdx#	     
+	 </update>
+	 
+	 <select id="kkuUserDAO.selectUserByMajor" resultClass="egovMap">
+		SELECT
+	    	*
+	    FROM 
+	    	KU_USER
+	    WHERE 
+	    	USR_MAJOR = #test#
+	</select>
+	
+	<update id="kkuUserDAO.updateViewWho">
+	     UPDATE
+	     	KU_USER
+	     SET
+	     	VIEW_CHECKING = CONCAT(VIEW_CHECKING,',',#noticeIdx#)
+		 WHERE
+		 	USR_IDX = #usrIdx#	     
+	 </update>
+	 
+</sqlMap>

@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="timetableDAO">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  	<typeAlias  alias="EgovKkuAppTimetableVO" type="egovframework.kku.usr.service.EgovKkuAppTimetableVO"/>
+  	
+  	<resultMap id="timetableMap" class="egovframework.kku.usr.service.EgovKkuAppTimetableVO">
+		<result property="timetableUsridx" column="TIMETBL_USRIDX"/>
+		<result property="timetableSubname" column="TIMETBL_SUBNAME"/>
+		<result property="timetableSubnum" column="TIMETBL_SUBNUM"/>
+		<result property="timetableDay" column="TIMETBL_DAY"/>
+		<result property="timetableStarttime" column="TIMETBL_STARTTIME"/>
+		<result property="timetableEndtime" column="TIMETBL_ENDTIME"/>
+	</resultMap>
+	
+	
+	<resultMap id="boardMap" class="egovframework.kku.usr.service.EgovKkuAppLectureReviewVO">
+		<result property="reviewIdx" column="REVIEW_IDX"/>
+	</resultMap>	
+	
+	
+	
+  	
+  	<insert id="timetableDAO.insertUserTimetable">
+		INSERT 
+			KU_TIMETABLE
+		SET
+			TIMETBL_USRIDX = #timetableUsridx#,
+			TIMETBL_SUBNUM = #timetableSubnum#,
+			TIMETBL_SUBNAME = #timetableSubname#,
+			TIMETBL_LECTUREROOM = #timetableLectureroom#,
+			TIMETBL_DAY = #timetableDay#,
+			TIMETBL_STARTTIME = #timetableStarttime#,
+			TIMETBL_ENDTIME = #timetableEndtime#,
+			TIMETBL_UPDATED = NOW()
+	</insert>
+	
+	<select id="timetableDAO.selectLectureListCnt" resultClass="int">
+		SELECT
+			COUNT(*)
+		FROM
+			KU_LECTUREINFO AS k
+		<isEmpty property="searchKeyword">
+			<isNotEmpty prepend="WHERE" property="searchMajor">
+				k.LECTURE_MAJOR LIKE CONCAT('%', #searchMajor#, '%')
+				<isNotEmpty prepend="AND" property="searchGrade">
+					k.LECTURE_STDGRADE = #searchGrade#
+				</isNotEmpty>
+			</isNotEmpty>
+			<isEmpty property="searchMajor">
+				<isNotEmpty prepend="WHERE" property="searchGrade">
+					k.LECTURE_STDGRADE = #searchGrade#
+				</isNotEmpty>
+			</isEmpty>
+		</isEmpty>
+		<isNotEmpty property="searchKeyword">
+			<isNotEmpty prepend="WHERE" property="searchMajor">
+				k.LECTURE_MAJOR LIKE CONCAT('%', #searchMajor#, '%')
+				<isNotEmpty prepend="AND" property="searchGrade">
+					k.LECTURE_STDGRADE = #searchGrade#
+					<isEqual prepend="AND" property="searchCondition" compareValue="lectureSubnum">
+						k.LECTURE_SUBNUM LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="AND" property="searchCondition" compareValue="lectureName">
+						k.LECTURE_NAME LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="AND" property="searchCondition" compareValue="lectureProfname">
+						k.LECTURE_PROFNAME LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="AND" property="searchCondition" compareValue="All">
+						(k.LECTURE_SUBNUM LIKE CONCAT('%', #searchKeyword#, '%')
+					OR
+						k.LECTURE_NAME LIKE CONCAT('%', #searchKeyword#, '%')
+					OR
+						k.LECTURE_PROFNAME LIKE CONCAT('%', #searchKeyword#, '%'))
+					</isEqual>
+				</isNotEmpty>
+				<isEmpty property="searchGrade">
+					<isEqual prepend="AND" property="searchCondition" compareValue="lectureSubnum">
+						k.LECTURE_SUBNUM LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="AND" property="searchCondition" compareValue="lectureName">
+						k.LECTURE_NAME LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="AND" property="searchCondition" compareValue="lectureProfname">
+						k.LECTURE_PROFNAME LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="AND" property="searchCondition" compareValue="All">
+						(k.LECTURE_SUBNUM LIKE CONCAT('%', #searchKeyword#, '%')
+					OR
+						k.LECTURE_NAME LIKE CONCAT('%', #searchKeyword#, '%')
+					OR
+						k.LECTURE_PROFNAME LIKE CONCAT('%', #searchKeyword#, '%'))
+					</isEqual>
+				</isEmpty>
+			</isNotEmpty>
+			<isEmpty property="searchMajor">
+				<isNotEmpty prepend="WHERE" property="searchGrade">
+					k.LECTURE_STDGRADE = #searchGrade#
+					<isEqual prepend="AND" property="searchCondition" compareValue="lectureSubnum">
+						k.LECTURE_SUBNUM LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="AND" property="searchCondition" compareValue="lectureName">
+						k.LECTURE_NAME LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="AND" property="searchCondition" compareValue="lectureProfname">
+						k.LECTURE_PROFNAME LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="AND" property="searchCondition" compareValue="All">
+						(k.LECTURE_SUBNUM LIKE CONCAT('%', #searchKeyword#, '%')
+					OR
+						k.LECTURE_NAME LIKE CONCAT('%', #searchKeyword#, '%')
+					OR
+						k.LECTURE_PROFNAME LIKE CONCAT('%', #searchKeyword#, '%'))
+					</isEqual>
+				</isNotEmpty>
+				<isEmpty property="searchGrade">
+					<isEqual prepend="WHERE" property="searchCondition" compareValue="lectureSubnum">
+						k.LECTURE_SUBNUM LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="WHERE" property="searchCondition" compareValue="lectureName">
+						k.LECTURE_NAME LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="WHERE" property="searchCondition" compareValue="lectureProfname">
+						k.LECTURE_PROFNAME LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="WHERE" property="searchCondition" compareValue="All">
+						(k.LECTURE_SUBNUM LIKE CONCAT('%', #searchKeyword#, '%')
+					OR
+						k.LECTURE_NAME LIKE CONCAT('%', #searchKeyword#, '%')
+					OR
+						k.LECTURE_PROFNAME LIKE CONCAT('%', #searchKeyword#, '%'))
+					</isEqual>
+				</isEmpty>
+			</isEmpty>
+		</isNotEmpty>
+	</select>
+	
+	<select id="timetableDAO.selectLectureList" resultClass="egovMap">
+		SELECT 
+			k.*
+		FROM 
+			KU_LECTUREINFO AS k
+		<isEmpty property="searchKeyword">
+			<isNotEmpty prepend="WHERE" property="searchMajor">
+				k.LECTURE_MAJOR LIKE CONCAT('%', #searchMajor#, '%')
+				<isNotEmpty prepend="AND" property="searchGrade">
+					k.LECTURE_STDGRADE = #searchGrade#
+				</isNotEmpty>
+			</isNotEmpty>
+			<isEmpty property="searchMajor">
+				<isNotEmpty prepend="WHERE" property="searchGrade">
+					k.LECTURE_STDGRADE = #searchGrade#
+				</isNotEmpty>
+			</isEmpty>
+		</isEmpty>
+		<isNotEmpty property="searchKeyword">
+			<isNotEmpty prepend="WHERE" property="searchMajor">
+				k.LECTURE_MAJOR LIKE CONCAT('%', #searchMajor#, '%')
+				<isNotEmpty prepend="AND" property="searchGrade">
+					k.LECTURE_STDGRADE = #searchGrade#
+					<isEqual prepend="AND" property="searchCondition" compareValue="lectureSubnum">
+						k.LECTURE_SUBNUM LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="AND" property="searchCondition" compareValue="lectureName">
+						k.LECTURE_NAME LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="AND" property="searchCondition" compareValue="lectureProfname">
+						k.LECTURE_PROFNAME LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="AND" property="searchCondition" compareValue="All">
+						(k.LECTURE_SUBNUM LIKE CONCAT('%', #searchKeyword#, '%')
+					OR
+						k.LECTURE_NAME LIKE CONCAT('%', #searchKeyword#, '%')
+					OR
+						k.LECTURE_PROFNAME LIKE CONCAT('%', #searchKeyword#, '%'))
+					</isEqual>
+				</isNotEmpty>
+				<isEmpty property="searchGrade">
+					<isEqual prepend="AND" property="searchCondition" compareValue="lectureSubnum">
+						k.LECTURE_SUBNUM LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="AND" property="searchCondition" compareValue="lectureName">
+						k.LECTURE_NAME LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="AND" property="searchCondition" compareValue="lectureProfname">
+						k.LECTURE_PROFNAME LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="AND" property="searchCondition" compareValue="All">
+						(k.LECTURE_SUBNUM LIKE CONCAT('%', #searchKeyword#, '%')
+					OR
+						k.LECTURE_NAME LIKE CONCAT('%', #searchKeyword#, '%')
+					OR
+						k.LECTURE_PROFNAME LIKE CONCAT('%', #searchKeyword#, '%'))
+					</isEqual>
+				</isEmpty>
+			</isNotEmpty>
+			<isEmpty property="searchMajor">
+				<isNotEmpty prepend="WHERE" property="searchGrade">
+					k.LECTURE_STDGRADE = #searchGrade#
+					<isEqual prepend="AND" property="searchCondition" compareValue="lectureSubnum">
+						k.LECTURE_SUBNUM LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="AND" property="searchCondition" compareValue="lectureName">
+						k.LECTURE_NAME LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="AND" property="searchCondition" compareValue="lectureProfname">
+						k.LECTURE_PROFNAME LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="AND" property="searchCondition" compareValue="All">
+						(k.LECTURE_SUBNUM LIKE CONCAT('%', #searchKeyword#, '%')
+					OR
+						k.LECTURE_NAME LIKE CONCAT('%', #searchKeyword#, '%')
+					OR
+						k.LECTURE_PROFNAME LIKE CONCAT('%', #searchKeyword#, '%'))
+					</isEqual>
+				</isNotEmpty>
+				<isEmpty property="searchGrade">
+					<isEqual prepend="WHERE" property="searchCondition" compareValue="lectureSubnum">
+						k.LECTURE_SUBNUM LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="WHERE" property="searchCondition" compareValue="lectureName">
+						k.LECTURE_NAME LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="WHERE" property="searchCondition" compareValue="lectureProfname">
+						k.LECTURE_PROFNAME LIKE CONCAT('%', #searchKeyword#, '%')
+					</isEqual>
+					<isEqual prepend="WHERE" property="searchCondition" compareValue="All">
+						(k.LECTURE_SUBNUM LIKE CONCAT('%', #searchKeyword#, '%')
+					OR
+						k.LECTURE_NAME LIKE CONCAT('%', #searchKeyword#, '%')
+					OR
+						k.LECTURE_PROFNAME LIKE CONCAT('%', #searchKeyword#, '%'))
+					</isEqual>
+				</isEmpty>
+			</isEmpty>
+		</isNotEmpty>
+		ORDER BY k.LECTURE_SUBNUM ASC
+		LIMIT 
+			#firstIndex#,#pageUnit#
+	</select>
+	
+	<select id="timetableDAO.selectLectureTime" resultClass="String">
+		SELECT 
+			LECTURE_TIME
+		FROM 
+			KU_LECTUREINFO
+		WHERE
+			LECTURE_SUBNUM = #data#
+	</select>
+	
+	<select id="timetableDAO.selectLectureInfo" resultClass="EgovMap">
+		SELECT 
+			*
+		FROM 
+			KU_LECTUREINFO
+		WHERE
+			LECTURE_SUBNUM = #subnum#
+	</select>
+	
+	<select id="timetableDAO.selectUsrTimetable" resultClass="EgovMap">
+		SELECT 
+			*
+		FROM 
+			KU_TIMETABLE
+		WHERE
+			TIMETBL_USRIDX = #timetableUsridx#
+		<!-- GROUP BY TIMETBL_SUBNUM -->
+		ORDER BY 
+<!-- 		CASE
+		    WHEN TIMETBL_DAY='월' THEN 1
+		    WHEN TIMETBL_DAY='화' THEN 2
+		    WHEN TIMETBL_DAY='수' THEN 3
+		    WHEN TIMETBL_DAY='목' THEN 4
+		    WHEN TIMETBL_DAY='금' THEN 5
+		    WHEN TIMETBL_DAY='토' THEN 6
+		    WHEN TIMETBL_DAY='일' THEN 7
+		    END ASC, -->
+			TIMETBL_UPDATED DESC,
+		    TIMETBL_STARTTIME ASC 
+		    LIMIT #usrTimetable#
+	</select>
+	
+	<select id="timetableDAO.selectUsrTimetableCnt" resultClass="int">
+		SELECT 
+			COUNT(*)
+		FROM 
+			KU_TIMETABLE
+		WHERE 
+			TIMETBL_USRIDX = #timetableUsridx#
+		AND 
+			TIMETBL_DAY = #timetableDay#
+		<![CDATA[
+		AND 
+			((#timetableStarttime# <= TIMETBL_STARTTIME AND TIMETBL_STARTTIME < #timetableEndtime#)
+			OR
+			(#timetableStarttime# < TIMETBL_ENDTIME AND TIMETBL_ENDTIME <= #timetableEndtime#))
+		]]>
+	</select>
+	
+	
+	<insert id="timetableDAO.insertReview">
+		INSERT INTO KU_LECTURE_REVIEW (
+		    SUB_NUM,
+		    WRITER,
+		    SELECTER,
+		    CONTENT,
+		    LECTURE_NAME,
+		    LECTURE_PROFNAME,
+		    STATUS
+		) VALUES (
+		    #subNum#,
+		    #writer#,
+		    #selecter#,
+			#content#,
+			#lectureName#,
+		    #lectureProfname#,
+		    '1'
+		)
+		<selectKey keyProperty="reviewIdx" resultClass="String">
+			SELECT @@IDENTITY
+		</selectKey>	
+	</insert>
+
+	<update id="timetableDAO.updateReview">
+		UPDATE 
+			KU_LECTURE_REVIEW
+	    SET
+			SELECTER = #selecter#,
+			CONTENT = #content#,
+			MOD_DATE = NOW()
+		WHERE
+			REVIEW_IDX = #reviewIdx#
+	</update>
+
+	<select id="timetableDAO.selectReviewByIdx" resultClass="EgovMap">
+		SELECT 
+			*,
+			(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_IDX = #reviewIdx#) AS FILE_CNT
+	    FROM
+			KU_LECTURE_REVIEW
+	    WHERE
+			REVIEW_IDX = #reviewIdx#
+	</select>
+
+	
+	<select id="timetableDAO.selectReview" resultClass="EgovMap">
+		SELECT 
+			R.*,
+			U.USR_NICKNAME, U.USR_MAJOR, SUBSTRING(U.USR_STDNUM, 3, 2) AS HACKBUN
+		FROM 
+			KU_LECTURE_REVIEW AS R, KU_USER AS U
+		WHERE
+			R.WRITER = U.USR_IDX
+		AND
+			LECTURE_NAME = #lectureName#
+		AND 
+			LECTURE_PROFNAME = #lectureProfname#
+		AND
+			STATUS = 1
+	</select>
+
+
+	<select id="timetableDAO.selectFile" resultClass="egovMap">
+		SELECT 
+			F.FILE_TBL_IDX, F.FILE_USR_FILE, F.FILE_SRV_FILE, F.FILE_IDX
+		FROM 
+			KU_LECTURE_REVIEW AS R
+		INNER JOIN
+			KU_FILE AS F
+		ON
+			R.REVIEW_IDX = F.FILE_TBL_IDX
+		<isNotEmpty prepend="AND" property="reviewIdx">
+			R.REVIEW_IDX = #reviewIdx#
+		</isNotEmpty>	
+		AND 
+			F.FILE_TBL_CODE = '3'
+		AND 
+			F.FILE_DEL_YN = 'N'
+		WHERE
+			R.LECTURE_NAME = #lectureName#
+		AND 
+			R.LECTURE_PROFNAME = #lectureProfname#
+	</select>	
+
+  	<update id="timetableDAO.deleteReview">
+		UPDATE 
+			KU_LECTURE_REVIEW
+	    SET
+			STATUS = 0
+		WHERE
+			REVIEW_IDX = #reviewIdx#
+	</update>	
+	
+	<update id="timetableDAO.deleteTimeTable">
+		DELETE 
+		FROM KU_TIMETABLE
+		WHERE TIMETBL_USRIDX = #timetableUsridx#
+	</update>
+	
+	<update id="timetableDAO.deleteTimetableSelected">
+		DELETE 
+		FROM 
+			KU_TIMETABLE
+		WHERE 
+			TIMETBL_USRIDX = #timetableUsridx#
+		AND
+			TIMETBL_SUBNUM = #timetableSubnum#
+	</update>
+	
+	<update id="timetableDAO.deleteUsrTimetable">
+	    UPDATE KU_USER
+	    SET
+	    	USR_TIMETABLE = 0
+	    WHERE
+	    	USR_IDX = #usrIdx#
+	</update>
+	
+	<update id="timetableDAO.decreaseUsrTimetable">
+		UPDATE KU_USER
+		SET
+			USR_TIMETABLE = USR_TIMETABLE-#usrTimeTable#
+		WHERE
+			USR_IDX = #usrIdx#
+	</update>
+	
+	<update id="timetableDAO.setUsrTimetable">
+	    UPDATE
+	    	KU_USER
+	    SET
+	    	USR_TIMETABLE = USR_TIMETABLE + #usrTimeTable#
+	    WHERE
+	    	USR_IDX = #usrIdx#
+	</update>
+	
+	<select id="timetableDAO.getUsrTimetable" resultClass="String">
+		SELECT 
+			USR_TIMETABLE
+		FROM 
+			KU_USER
+		WHERE
+			USR_IDX = #usrIdx#
+	</select>
+	
+</sqlMap>

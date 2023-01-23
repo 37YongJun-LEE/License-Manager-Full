@@ -1,0 +1,160 @@
+@charset "utf-8";
+/* .bbs_view .writer .photo span img {width: 60px;}
+
+.bbs_view .writer									{display:flex; width:100%;align-items:center;margin: 0 0 15px;}
+.bbs_view .writer .photo							{width:60px; display:block}
+.bbs_view .writer .photo span						{display:block;width: 60px;height: 60px; border:1px solid #ddd; border-radius:50%;background: #ddd;overflow: hidden;}
+.bbs_view .writer .info								{width:calc(100% - 60px);padding: 0px 0px 0 12px; box-sizing:border-box;font-size: 0;word-break: break-all;} */
+
+.bottom_menu p a.chat {position:relative}
+.bottom_menu p a.chat .chat_num {position:absolute;top: -8px;left: 50%; color:#fff; font:500 11px/11px"Roboto", "Noto Sans KR", sans-serif;color:#fff;padding: 2px 4px; box-sizing:border-box; border-radius:10px; background:#e71b00;min-width: 22px;text-align: center;display: inline-block;}
+
+.bbs_write .add_photo a.add {    padding: 12px 15px 12px;}
+.mp_list li > div		{justify-content: space-between;}
+.mp_list li > div > div {width:calc(75% - 10px)}
+.mydeal.vers li > div	{width: calc(75% - 10px);}
+
+@media only screen and (min-width: 640px) {
+div.layer .pop-layer {width:50%}
+}
+
+/* 친구목록 */
+.fm_top							{padding: 25px 15px 15px; border-bottom:1px solid #eee}
+.fm_top .more_fd				{font-size:0; fill:#333;width: 35px;height: 45px;text-align: center;display: flex;align-items: center;justify-content: center; margin-left:5px}
+.fm_top .search .input_box      {width: calc(100% - 40px);}
+a.waiting						{font:500 15px/50px"Roboto", "Noto Sans KR", sans-serif; display:block;background: url('/_img/_img/cont/my_list_arrow.png')no-repeat right 5px top 50% / 7px; color:#333; margin-bottom:15px; box-sizing:border-box}
+a.waiting::before				{content:''; display:inline-block;width: 50px;height: 50px; border-radius:50%;background: #c4db75 url('/_img/_img/cont/waiting.png')no-repeat 52% 56% / 20px;vertical-align: middle;margin-right: 10px;}
+
+.fm_bottom.w_box				{padding-top:15px}
+.fm_list li						{display:flex;align-items: center;margin-bottom: 12px;height: 62px;}
+.fm_list li span.star			{position: absolute;bottom: -5px;left: 36px;background: #fdcf15;width: 18px;height: 18px;border-radius: 20px;border: 2px solid #fff;text-align: center;line-height: 16px;}
+.fm_list li span.star svg		{width: 10px;fill: #fff;}
+.fm_list li span.president		{position: absolute;bottom: -5px;left: 36px;background: #005ab6  url('/_img/_img/cont/club_presidentW.png')no-repeat 50% 45% / 10px; width: 18px;height: 18px;border-radius: 20px;border: 2px solid #fff;text-align: center;line-height: 16px;}
+.fm_profile						{position:relative;width: 60px;margin-left: 4px;cursor: pointer;}
+.fm_list  li p.img				{width: 50px;height: 50px;border-radius: 80px;overflow: hidden;background: #ddd;border: 1px solid #ddd;/* margin-bottom: 10px; */}
+.fm_list  li p.img img			{display: block; width: 100%;}
+.fm_list  li p.img img::before	{content: ''; width: 50px; height: 50px; display: block; background: url('/_img/_img/cont/friend_bg2.png')no-repeat 50% 50% / cover;}
+.fm_list  li p.border			{position: absolute;left: -4px;top: -4px;display: block;width: 56px;height: 56px;border-radius: 90px;border: 2px solid transparent;background-origin: border-box;background-clip: content-box, border-box;z-index: -1;}
+.fm_list  li p.border.blue		{background-image: linear-gradient(#fff, #fff),  linear-gradient(to right,  #005ab6 0%,  #007eff 100%);}
+.fm_list  li p.border.green		{background-image: linear-gradient(#fff, #fff),  linear-gradient(to right,  #0a8800 0%,  #00bc1f 100%);}
+.fm_list  li p.border.red		{background-image: linear-gradient(#fff, #fff),  linear-gradient(to right,  #cf2200 0%,  #fc2f00 100%);}
+
+.fm_list  li div.info				{width: calc(100% - 75px); padding-left:10px; font:300 14px/14px"Roboto", "Noto Sans KR", sans-serif;  color:#888;box-sizing: border-box;padding-right: 10px;}
+.fm_list  li div.info p.tt			{font: 500 15px/16px"Roboto", "Noto Sans KR", sans-serif; color:#333;margin-bottom: 10px;overflow: hidden;display: -webkit-box;-webkit-line-clamp: 1;-webkit-box-orient: vertical;word-break: break-all;height: 16px;}
+.fm_list  li div.info span::after	{content: ''; display: inline-block; width: 2px; height: 2px; background: #ccc; margin: 0 5px; border-radius: 10px; vertical-align: 3px;}
+.fm_list  li div.info span:last-child::after {display:none}
+.fm_list  li a.more						{margin-left:auto;width: 15px; display:inline-block; text-align:center}
+.fm_bottom .num						{font:400 13px/13px"Roboto", "Noto Sans KR", sans-serif; border-top:1px solid #eee; color:#888;margin: 0px 0 12px;padding: 20px 0 0;}
+
+.pop_cont.friend_list p.name	{font:500 18px/24px"Roboto", "Noto Sans KR", sans-serif;}
+.pop_cont.friend_list ul li a	{display:block; width:100%; box-sizing:border-box; font:400 16px/24px"Roboto", "Noto Sans KR", sans-serif; color:#333;margin-top: 10px;}
+
+/* 신청대기목록 */
+.fm_list.wait li .right_btn {margin-left:auto;width: 104px;text-align: right;}
+.fm_list.wait li			{height:auto}
+.fm_list.wait .fm_profile   {margin-left:0; width:52px}
+.fm_list.wait li div.info   {width: calc(100% - 156px);}
+
+
+/* 중고거래 */
+.deal_wrap .mydeal.vers li {padding:16px 0px}
+.deal_wrap .mydeal.vers {border-top:1px solid #eee; margin-top:15px}
+
+a.add_btn {display:block; width:50px; height:50px; border-radius:50%; background:#005228 url('/_img/_img/cont/w_plus.png')no-repeat 50% 50% /17px; position:fixed; bottom:85px; right:20px}
+
+
+/* 중고거래 */
+#sub_contents.deal   {position:relative}
+.navi.tp			 {position:absolute; top:0; z-index:1}
+.navi.tp .top_navi   {border-bottom:none}
+.navi.tp .top_navi a {padding-left:2px}
+
+.view_middle						{padding:25px 15px 0}
+.view_middle p.tt					{font: 500 18px/24px "Roboto", "Noto Sans KR", sans-serif; color: #333;}
+.view_middle span					{display:inline-block;font: 300 12px/16px "Roboto", "Noto Sans KR", sans-serif; color:#888;margin-bottom: 0px;}
+.view_middle span::after			{content:''; display:inline-block;width: 2px;height: 2px; background:#ccc; border-radius:50%;vertical-align: middle;margin: 0px 5px;}
+.view_middle span:last-child::after	{display:none}
+
+.price_box					{width:100%; box-sizing:border-box; position:fixed; bottom:0;box-shadow: 0px 0px 30px rgba(0,0,0,0.15);-webkit-box-shadow: 0px 0px 30px rgba(0,0,0,0.15);-moz-box-shadow: 0px 0px 30px rgba(0,0,0,0.15);-ms-box-shadow: 0px 0px 30px rgba(0,0,0,0.15); display:flex; padding:6px 15px 6px 0;align-items: center;}
+.price_box a.heart_check	{fill:#ddd;height:50px;width:65px;text-align: center;display: flex;align-items: center;justify-content: center; border-right:1px solid #eee}
+.price_box a.heart_check.on	{fill:#e71b00;}
+.price_box p				{width:calc(100% - 65px); padding:0 0 0 15px; display:flex;align-items: center; box-sizing:border-box}
+.price_box p a				{margin-left:auto}
+.price_box p span			{font:600 18px/22px"Roboto", "Noto Sans KR", sans-serif;color: #333; display:block;width: calc(100% - 85px);word-break: break-word;}
+/* 중고거래 > 내 게시글 임시 버튼 디자인 */
+.view_menu p.btn_area				 {display:table; width:100%; box-sizing:border-box; table-layout:fixed; border-top:1px solid #eee; margin-top:16px }
+.view_menu p.btn_area a			 {display:table-cell; box-sizing:border-box; text-align:center; border-right:1px solid #eee; font:600 15px/15px "Roboto", "Noto Sans KR", sans-serif; color: #333; padding:12px 0 }
+
+.view_menu a.dealok {color:#ccc}
+
+
+/* 채팅목록 */
+.chat_list li					{display:flex; align-items:center; padding:14px 0; border-bottom:1px solid #eee}
+.chat_list li:first-child		{padding-top:0}
+.chat_list li p.img				{width: 60px;height: 60px;border-radius: 80px;overflow: hidden;background: #ddd;border: 1px solid #ddd;}
+.chat_list li p.img img			{display: block; width: 100%;}
+.chat_list li p.img img::before	{content: ''; width: 60px; height: 60px; display: block; background: url('/_img/_img/cont/friend_bg2.png')no-repeat 50% 50% / cover;}
+.chat_list li .text				{width:calc(100% - 60px); padding-left:10px;}
+.chat_list li .text	p.name		{font: 500 15px/16px"Roboto", "Noto Sans KR", sans-serif; color:#333;display: flex;}
+.chat_list li .text	p.name span {overflow: hidden;display: -webkit-box;-webkit-line-clamp: 1;-webkit-box-orient: vertical;word-break: break-all;height: 15px;max-width: calc(100% - 50px);}
+.chat_list li .text	p.name .time {display:inline-block; font:300 12px/16px"Roboto", "Noto Sans KR", sans-serif; color:#888;vertical-align: top; margin-left:5px;width: 50px;}
+.chat_list li .text p.con		{overflow: hidden;display: -webkit-box;-webkit-line-clamp: 1;-webkit-box-orient: vertical;word-break: break-all;height: 16px; width:100%; font:400 15px/16px"Roboto", "Noto Sans KR", sans-serif; color:#333; margin-top:8px}
+.chat_list li > p				{width:50px; text-align:right}
+.chat_list li > p .chat_num		{color:#fff; font:500 11px/11px"Roboto", "Noto Sans KR", sans-serif;color:#fff;padding:4px 5px; box-sizing:border-box; border-radius:10px; background:#e71b00;min-width: 25px;text-align: center;display: inline-block;}
+.chat_list a.close {display:block; width:21px; height:21px; border-radius:50%;background: #333 url('/_img/_img/cont/close.png')no-repeat 50% 50% / 8px;position: absolute;top: -8px;right: -8px;}
+.chat_list ul {dispaly: flex;}
+
+/* 채팅창 */
+#chat_room p.img				{width: 40px;height: 40px;border-radius: 80px;overflow: hidden;background: #ddd;border: 1px solid #ddd;}
+#chat_room p.img img			{display: block; width: 100%;}
+#chat_room p.img img::before	{content: ''; width: 40px; height: 40px; display: block; background: url('/_img/_img/cont/friend_bg2.png')no-repeat 50% 50% / cover;}
+
+#chat_room .top_navi		{display:flex;align-items: center;height: 60px;top: 0;width: 100%;position: fixed;background: #fff;}
+#chat_room .top_navi h2		{margin-left:10px;width: calc(100% - 74px);display: -webkit-box;-webkit-line-clamp: 1;-webkit-box-orient: vertical;word-break: break-all;height: 18px;overflow: hidden;}
+
+#chat_room .chat_content	{padding: 90px 15px 90px;}
+#chat_room .date_line		{text-align:center; font:400 13px/13px"Roboto", "Noto Sans KR", sans-serif;color:#888;height:15px; margin-top: 30px;}
+#chat_room .date_line:nth-child(1)	{margin-top: 0;}
+#chat_room .date_line time	{font:400 13px/13px"Roboto", "Noto Sans KR", sans-serif !important;color:#888;}
+#chat_room .friend_chat		{display: flex; flex-direction: row; justify-content: flex-start; align-items: flex-end; margin:15px 0; margin-right:calc(15% - 40px);}
+#chat_room .me_chat			{display: flex; flex-direction: row-reverse; justify-content: flex-start; align-items: flex-end; margin:15px 0; margin-left: 15%;}
+#chat_room .balloon			{font:400 15px/20px"Roboto", "Noto Sans KR", sans-serif; border-radius:10px;padding:10px 12px ;display: inline-block;box-sizing:border-box; text-align:left}
+#chat_room .me_chat .balloon {background:#005228; color:#fff}
+#chat_room .friend_chat .balloon	{background:#f8f8f8; color:#333}
+#chat_room .me_chat_col				{box-sizing:border-box;max-width: calc(100% - 55px);}
+#chat_room .friend_chat_col			{box-sizing:border-box;max-width: calc(100% - 107px);margin-left: 10px;}
+#chat_room .me_chat_col p			{text-align:right}
+#chat_room .me_chat_col p + p, .friend_chat_col p + p  {margin-top:5px}
+#chat_room .main_chat time				{font:400 11px/11px"Roboto", "Noto Sans KR", sans-serif; color:#888; align-self: flex-end;box-sizing: border-box;}
+/* #chat_room .me_chat time				{margin:0 5px 2px 0px}
+#chat_room .friend_chat time			{margin:0 0px 2px 5px} */
+
+#chat_room .me_chat .message_time_box		{text-align: right; margin-right: 6px; margin-bottom: -2px;}
+#chat_room .friend_chat .message_time_box	{margin-left: 6px;}
+#chat_room .message_time_box				{}
+#chat_room  .readCheck						{font: 500 10px/10px"Roboto", "Noto Sans KR", sans-serif; margin-bottom: -6px;}
+
+#chat_room .insert_content			{position: fixed; background:#f2f3f7; padding:10px 15px; box-sizing:border-box;width: 100%; display:flex;bottom: 0;}
+#chat_room .insert_content textarea {box-sizing: border-box;background:#fff;height: 45px;resize: horizontal;max-height: 85px;padding: 12px 38px 12px 15px;}
+#chat_room .insert_content  input	{background:#fff; padding: 5px;}
+
+#chat_room .submit_wrap				{display:flex;  width:calc(100% - 35px)}
+ 
+#chat_room .insert_content .add_photo	{width:35px;height: 45px;display: flex;align-items: center;}
+#chat_room .chat_insert					{position:relative;width: calc(100% - 35px);display: flex;}
+#chat_room .chat_insert .emoticon		{position:absolute;top: 50%; right:10px;transform:translateY(-50%);}
+#chat_room .chat_submit					{width: 35px; text-align:right;display: flex;align-items: center;justify-content: end;height: 45px;align-self: flex-start;}
+
+/* 기숙사 */
+.stay_choice li + li		{margin-top:15px}
+.stay_choice li a			{width:100%;display: flex; background:#f8f8f8;border-radius: 10px;box-sizing: border-box;font: 500 16px/19px"Roboto", "Noto Sans KR", sans-serif; color:#333;word-break: keep-all;text-align: center;padding: 25px;justify-content: center;align-items: center;}
+.stay_choice li a::before	{content:''; display:inline-block;width: 32px;height: 34px;background: url('/_img/_img/cont/stay_icon.png')no-repeat 50% 50% / 32px;margin-right: 15px;}
+
+/* 택시 */
+.best_list.taxi li > div { display:block; width: 100%; font:400 15px/20px"Roboto", "Noto Sans KR", sans-serif; color:#888;}
+.best_list.taxi li > div span.b {font-weight:500; color:#333;display: inline-block;width: 46px;}
+.best_list.taxi li div.place {display:flex;flex-wrap: wrap;}
+.best_list.taxi li div.place p {background: url('/_img/_img/cont/taxi_place.png')no-repeat 0% 2px / 12px; padding-left:17px;margin-bottom:2px;}
+.best_list.taxi li div.place p::after {content:''; display:inline-block;width: 19px;height: 14px;background: url('/_img/_img/cont/taxi_arrow.png')no-repeat 50% 50% / 19px;margin: 0 7px;}
+.best_list.taxi li div.place p:last-child::after {display:none}
+.best_list.taxi li p.time {margin-top:3px}

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="kkuAdminReportPage">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+
+
+ 	<select id="adminReportDAO.getReportList" resultClass="egovMap">
+ 	    SELECT 
+		(select ku.USR_EMAIL from KU_USER ku where ku.USR_IDX = krl.REPORTER_IDX)  as REPORTER_ID ,
+		(select ku.USR_EMAIL from KU_USER ku where ku.USR_IDX = krl.WRITER_IDX)  as WRITER_ID ,krl.*
+		FROM KU_REPORT_LIST krl
+		WHERE
+		1=1
+		<isNotEmpty prepend="AND" property="orderBy" >
+ 	   		krl.REPORT_TBL_CODE = #orderBy#
+ 	   	</isNotEmpty>
+ 	   	 <isNotEmpty prepend="AND" property="searchSdate">
+			DATE_FORMAT(krl.REPORT_DATE,  '%Y-%m-%d') <![CDATA[>=]]> #searchSdate# 
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="searchEdate">
+			DATE_FORMAT(krl.REPORT_DATE,  '%Y-%m-%d') <![CDATA[<=]]> #searchEdate#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="searchKeyword">
+		    <isEqual property="searchCondition" compareValue="all">
+		        (krl.CONTENT LIKE CONCAT('%',#searchKeyword#,'%') ||   krl.reporter_idx in (select usr_idx from KU_USER where usr_email LIKE CONCAT('%',#searchKeyword#,'%'))|| krl.writer_idx in (select usr_idx from KU_USER where usr_email LIKE CONCAT('%',#searchKeyword#,'%')) )
+		    </isEqual>
+		     <isEqual property="searchCondition" compareValue="reporter">
+		        krl.writer_idx in (select usr_idx from KU_USER where usr_email LIKE CONCAT('%',#searchKeyword#,'%'))		        
+		    </isEqual>
+		     <isEqual property="searchCondition" compareValue="reported">
+		        krl.reporter_idx in (select usr_idx from KU_USER where usr_email LIKE CONCAT('%',#searchKeyword#,'%'))
+		    </isEqual>
+		     <isEqual property="searchCondition" compareValue="content">
+		        krl.CONTENT LIKE CONCAT('%',#searchKeyword#,'%')
+		    </isEqual>
+		</isNotEmpty>
+ 	    ORDER BY
+			krl.REPORT_DATE DESC		
+		limit #firstIndex#, #pageUnit#
+ 	</select>
+
+ 	<update id="adminReportDAO.updateReportProcessState">
+ 	    UPDATE 
+ 	    	KU_REPORT_LIST
+ 	   	SET 
+ 	   		REPORT_STATE = #reportState# ,
+ 	   		REPORT_PROCESSDATE = sysdate()
+ 	   		<isNotEmpty prepend="," property="reportProcesscomment" >
+ 	   		 REPORT_PROCESSPERSON =  #reportProcessperson#,
+ 	   		 REPORT_PROCESSCOMMENT = #reportProcesscomment#
+ 	   		</isNotEmpty>
+ 	   	WHERE
+ 	   		REPORT_IDX = #reportIdx#
+ 	</update>
+
+ 	<select id="adminReportDAO.selectReportDetail" resultClass="egovMap">
+ 	    SELECT
+ 	    (select ku.USR_EMAIL from KU_USER ku where ku.USR_IDX = krl.REPORTER_IDX)  as REPORTER_ID ,
+		(select ku.USR_EMAIL from KU_USER ku where ku.USR_IDX = krl.WRITER_IDX)  as WRITER_ID, 
+			krl.* 
+			<isNotEmpty prepend="," property="reportTblCode" >
+ 	   			<isEqual property="reportTblCode" compareValue="1">
+ 	   			    kb.*  
+ 	   			</isEqual>
+ 	   		</isNotEmpty>
+		FROM 
+ 	    	KU_REPORT_LIST as krl  	    	
+ 	    	<isNotEmpty prepend="" property="reportTblCode" >
+ 	   			<isEqual property="reportTblCode" compareValue="1">
+ 	   			    INNER JOIN 
+ 	   			    	KU_BOARD as kb
+ 	   			    ON
+ 	   			     	kb.BOARD_IDX = krl.REPORT_BOARD_IDX	    
+ 	   			</isEqual>
+ 	   		</isNotEmpty> 	   		
+ 	    WHERE
+ 	   	 	krl.REPORT_IDX =#reportIdx#
+ 	   	 	
+ 	</select>
+ 	
+ 	<select id="adminReportDAO.getReportListCnt" resultClass="java.lang.Integer">
+ 	    SELECT 
+		count(*)
+		FROM KU_REPORT_LIST krl
+ 	</select>
+ 	<update id="adminReportDAO.updateReport">
+ 	    UPDATE
+ 	    	KU_REPORT_LIST
+ 	    SET
+ 	    	REPORT_STATE = #reportState#,
+ 	    	REPORT_PROCESSCOMMENT = #reportProcesscomment#,
+ 	    	REPORT_PROCESSDATE = SYSDATE(),
+ 	    	MOD_DATE = SYSDATE(),
+ 	    	MOD_ID = #modId#,
+ 	    	MOD_IP = #modIp#,
+ 	    	MOD_IDX = #modIdx#
+ 	    WHERE
+ 	    	REPORT_IDX = #reportIdx#
+ 	    	
+ 	    
+ 	</update>
+ 	
+ 	<delete id="adminReportDAO.deleteReport">
+ 	    DELETE FROM
+ 	    	KU_REPORT_LIST
+ 	    WHERE
+ 	    	REPORT_IDX = #reportIdx#
+ 	    	
+ 	    
+ 	</delete>
+</sqlMap>

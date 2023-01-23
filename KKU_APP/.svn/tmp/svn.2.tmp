@@ -1,0 +1,95 @@
+package egovframework.kku.adm.service.impl;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
+import egovframework.kku.adm.service.EgovKkuAdmCampusInfoVO;
+import egovframework.kku.adm.service.EgovKkuAdmCampusService;
+import egovframework.kku.adm.service.EgovKkuAdmStudentInfoVO;
+import egovframework.kku.usr.service.EgovKkuAppSchoolInfoCrawlerVO;
+import egovframework.rte.psl.dataaccess.util.EgovMap;
+
+@Service("adminCampusService")
+public class EgovKkuAdmCampusServiceImpl implements EgovKkuAdmCampusService{
+
+	@Resource(name="adminCampusDAO")
+	EgovKkuAdmCampusDAO adminCampusDAO;
+
+	@Override
+	public List<?> getReportList() throws Exception {
+		return adminCampusDAO.getReportList();
+	}
+
+	@Override
+	public List<EgovMap> selectCampusInfoList(EgovKkuAdmCampusInfoVO infoVO) throws Exception {
+		
+		return adminCampusDAO.selectCampusList(infoVO);
+	}
+	
+	@Override
+	public List<?> selectCampusInfoUpdateList() throws Exception {
+		
+		return adminCampusDAO.selectCampusInfoUpdateList();
+	}
+	
+	@Override
+	public List<EgovMap> selectStudentInfoList(EgovKkuAppSchoolInfoCrawlerVO infoVO) throws Exception {
+		
+		return adminCampusDAO.selectStudentList(infoVO);
+	}
+
+	@Override
+	public List<?> selectStudentInfoUpdateList() throws Exception {
+		
+		return adminCampusDAO.selectStudentInfoUpdateList();
+	}
+
+	@Override
+	public EgovKkuAdmCampusInfoVO selectCampusInfoDetail(EgovKkuAdmCampusInfoVO infoVO) throws Exception {
+		
+		return adminCampusDAO.selectCampusInfoDetail(infoVO);
+	}
+
+	@Override
+	public int updateCampusInfo(EgovKkuAdmCampusInfoVO infoVO) throws Exception {
+		
+		return adminCampusDAO.updateCampusInfo(infoVO);
+	}
+
+	@Override
+	public int selectCampusInfoListCnt(EgovKkuAdmCampusInfoVO infoVO) throws Exception {
+		
+		return adminCampusDAO.selectCampusInfoListCnt(infoVO);
+	}
+
+	@Override
+	public int selectStudentInfoListCnt(EgovKkuAppSchoolInfoCrawlerVO infoVO) throws Exception {
+		
+		return adminCampusDAO.selectStudentInfoListCnt(infoVO);
+	}
+
+	@Override
+	public EgovKkuAdmStudentInfoVO selectStudentInfoDetail(EgovKkuAdmStudentInfoVO infoVO)
+			throws Exception {
+		
+		return adminCampusDAO.selectStudentInfoDetail(infoVO);
+	}
+
+	@Override
+	public int updateStudentInfo(EgovKkuAdmStudentInfoVO infoVO) throws Exception {
+		
+		return (int)adminCampusDAO.updateStudentInfo(infoVO);
+	}
+
+	
+
+	
+
+	
+
+	
+	
+}

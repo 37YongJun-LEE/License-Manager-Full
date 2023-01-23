@@ -1,0 +1,117 @@
+@charset "utf-8";
+ h2					{font: 700 21px/24px 'NotoSansKR', sans-serif; text-align:center; margin:16px 0 10px; letter-spacing:-1px;}
+ h2 > a				{font: 700 21px/24px 'NotoSansKR', sans-serif; text-align:center; margin:16px 0 10px; letter-spacing:-1px;}
+ h3					{font: 700 21px/24px 'NotoSansKR', sans-serif; float:left; margin-bottom:15px; letter-spacing:-1px;}
+.bg_gray			{background:#f5f5f5; padding-top:20px; margin-bottom:20px;}
+.bg_gray02		{background:#f5f5f5 !important; padding-top:40px; padding-bottom:40px;}
+
+p.gray	{color:#aaa;  font: 300 15px/18px 'NotoSansKR', sans-serif;}
+.red	{color:#ee2c49;}
+
+input, select	{outline:none; -webkit-appearance: none; -moz-appearance: none; appearance: none;}
+
+/* header*/
+#header				{width:100%; overflow:hidden; background:#ee2c49; position:relative; padding:0 17px; box-sizing:border-box;}
+h1						{text-align:center; color:#fff; padding:16px 0px; font: 700 17.5px/24px 'NotoSansKR', sans-serif;}
+h1 > a					{text-align:center; color:#fff; padding:16px 0px; font: 700 17.5px/24px 'NotoSansKR', sans-serif;}
+
+#header table 							{width:100%; }
+#header table tr						{width:100%;}
+#header td.menu						{padding-top:20px; vertical-align:top;}
+#header td.login						{padding-top:15px;  vertical-align:top;  overflow:hidden; min-width:48px;}
+#header td.login p					{float:right;}
+#header td.login p a					{float:left;}
+#header td.login p a:first-child	{margin-right:10px;}
+
+#content									{width:100%; box-sizing:border-box; padding:20px 17px 40px 17px;}
+
+/* 레프트메뉴 */
+#header button		{background:transparent; border:none; outline:none; -webkit-appearance: none;-moz-appearance: none; appearance: none; cursor:pointer;}
+
+/* 레프트 메뉴 */
+div.slideout-menu				{position:fixed; width:60%; top:0; left:0; height:100%; background:#fff; z-index:999; overflow:auto; }
+div.slideout-menu-mask			{position:fixed; top:0; right: 0; width: 100%; height: 100%; background: #000; z-index: 101; margin:0; filter:alpha(opacity=30); opacity:0.5; -moz-opacity:0.5;}
+
+div.m_menu								{width:100%;}
+div.m_menu p.close_btn			{ width:100%; height:56px;}
+div.m_menu p.close_btn a		{padding:20px; width:20px; display:block;}
+div.m_menu > ul							{width:100%; border-top:solid 1px #ddd;}
+div.m_menu > ul > li							{border-bottom:solid 1px #ddd;  }
+div.m_menu > ul > li.on	 a.depth01	{background:url('/_img/usr/cont/arrow_up.png')no-repeat center right 25px/15px; font-weight:700;}
+div.m_menu ul li a.depth01				{display:block; padding:16px 20px;background:url('/_img/usr/cont/arrow_d.png')no-repeat center right 25px/15px; font-weight:500;}
+
+div.m_menu ul li ul.depth02	li a			{display:block; padding:16px 20px; background:#f5f5f5; color:#888;  font: 400 15px/18px 'NotoSansKR', sans-serif;}
+
+
+/* footer */
+footer								{width:100%; background:#eee; overflow:hidden; padding:20px 15px; box-sizing:border-box; }
+footer p							{color:#aaa; font: 100 14px/18px 'NotoSansKR', sans-serif; }
+footer p span::before		{display:inline-block; content:""; width:1px; height:13px; background:#d3d3d3; margin:0 5px;}
+.f_copy								{color:#aaa; font: 100 14px/24px 'NotoSansKR', sans-serif; display:block; margin-top:10px; }
+
+
+/* 버튼 */
+.btn									{width:100%; text-align:center;}
+.btn a								{display:inline-block; text-align:center; box-sizing:border-box; border-radius:3px; margin-bottom:40px;}
+a.g_btn, a.r_btn				{ text-align:center; width:48%;  padding:16px 12px 14px; color:#fff; }
+a.g_btn02, a.r_btn02		{ text-align:center; width:100%;  padding:16px 12px 14px; color:#fff; }
+a.g_btn				{background:#999; margin-right:1%;}
+a.g_btn02			{background:#999;}
+a.r_btn, a.r_btn02			{background:#ee2c49;}
+a.r_l_btn							{border:solid 1px #ee2c49; color:#ee2c49; background:#fff;}
+
+select::-ms-expand {display:none}
+
+/* search */
+div.search_wrap																{width:100%;}
+
+div.search_wrap div.search												{width:100%;  padding:10px 15px 0px; box-sizing:border-box; }
+div.search_wrap div.search p												{position:relative; width:100%; background-color:#fff; border-radius:25px; box-sizing:border-box; overflow:hidden;}
+div.search_wrap div.search p input									{float:left; width:100%;  box-sizing:border-box; padding:12px 10px 13px 40px; font: 300 14px/14px 'NotoSansKR', sans-serif;  background:url('/_img/usr/comn/search.png')no-repeat center left 15px;  background-size:18px; border:none; outline:none; -webkit-appearance: none; -moz-appearance: none; appearance: none;}
+
+div.search_wrap div.search02											{width:100%;  padding:10px 15px; box-sizing:border-box; }
+div.search_wrap div.search02 table									{width:100%;}
+div.search_wrap div.search02 table col.t01						{width:100px;}
+div.search_wrap div.search02 table col.t02						{width:auto;}
+div.search_wrap div.search02 table tr td.sel select				{border-radius:23px 0 0 23px ; border:none; display:inline-block; width:100%; height:44px; background:#fff url('/_img/usr/comn/arrow02.png')no-repeat 100% 50% / 12px; padding:0 22px; font:300 14px/14px "Noto Sans KR", sans-serif; color:#333; vertical-align:middle; outline:none; -webkit-appearance: none; -moz-appearance: none; appearance: none;}
+div.search_wrap div.search02 table tr td.sel select option	{outline:none;}
+div.search_wrap div.search02 table tr td span					{display:inline-block; position:absolute; margin-left:10px; width:1px; height:18px; background:#ddd; margin-top:13px;}
+
+div.search_wrap div.search02 table tr td							{position:relative;}
+div.search_wrap div.search02 table tr td a							{position:absolute; display:block; top:13px; right:20px; z-index:5; width:20px; height:20px; background:url('/_img/usr/comn/search.png')no-repeat 50% 50% / 18px;}
+div.search_wrap div.search02 table tr td input					{width:100%; height:44px; font: 300 14px/14px 'NotoSansKR', sans-serif; border:none; border-radius:0 23px 23px 0; background:#fff; padding:0 35px 0 20px; vertical-align:middle; outline:none; -webkit-appearance: none; -moz-appearance: none; appearance: none;}
+
+
+/* 퀵메뉴 */
+.quick					{width:100%; box-sizing:border-box; padding:0 10px; position:fixed; bottom:0; background:#fff; height:80px; border-top:solid 1px #ddd;}
+.quick ul				{overflow:hidden;}
+.quick ul li				{float:left; height:80px; width:25%;text-align:center;}
+.quick ul li a			{font: 400  14px/15px 'NotoSansKR', sans-serif; display:inline-block; padding-top:40px; }
+
+/* 지역별 퀵메뉴 */
+.lo_main .quick .q_01{background:url('/_img/usr/main/lo_q01.png')no-repeat center top 7px; background-size:40px;}
+.lo_main .quick .q_02{background:url('/_img/usr/main/lo_q02.png')no-repeat center top 7px; background-size:40px;}
+.lo_main .quick .q_03{background:url('/_img/usr/main/lo_q03.png')no-repeat center top 7px; background-size:40px;}
+.lo_main .quick .q_04{background:url('/_img/usr/main/lo_q04.png')no-repeat center top 7px; background-size:40px;}
+
+/* 기수별 퀵메뉴 */
+.n_main .quick .q_01{background:url('/_img/usr/main/n_q01.png')no-repeat center top 7px; background-size:40px;}
+.n_main .quick .q_02{background:url('/_img/usr/main/n_q02.png')no-repeat center top 7px; background-size:40px;}
+.n_main .quick .q_03{background:url('/_img/usr/main/n_q03.png')no-repeat center top 7px; background-size:40px;}
+.n_main .quick .q_04{background:url('/_img/usr/main/n_q04.png')no-repeat center top 7px; background-size:40px;}
+
+/* r_tmn */
+div.r_tmn					{width:100%; padding:0 17px; box-sizing:border-box;}
+div.r_tmn table			{width:100%; }
+div.r_tmn table td		{}
+
+div.tmn_under{ width:100%; position:absolute; z-index:-1; border-bottom:solid #eee 4px; margin-top:-4px;}
+div.r_tmn > ul	{ overflow:hidden; width:100%; display:table;}
+div.r_tmn > ul > li{position:relative; height:45px; display:table-cell; text-align:center; }
+div.r_tmn > ul > li a{display:inline-block; min-height:45px; padding:10px 5px; box-sizing:border-box; font: 500 18px/20px 'NotoSansKR', sans-serif; color:#aaa;}
+div.r_tmn > ul > li a.on{color:#ee2c49; font-weight:700; border-bottom:solid 4px #ee2c49;}
+div.r_tmn > ul > li a:hover{color:#ee2c49; font-weight:700;}
+div.r_tmn > ul > li + li::before{position:absolute; left:0; top:16px; content:""; width:1px; height:10px; background:#ddd;}
+
+
+

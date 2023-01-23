@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="lostDAO">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  	<typeAlias  alias="lostVO" type="egovframework.kku.usr.service.EgovKkuLostVO"/>
+  	
+	<resultMap id="boardMap" class="egovframework.kku.usr.service.EgovKkuLostVO">
+		<result property="lostIdx" column="LOST_IDX"/>
+		<result property="lostSelecter" column="LOST_SELECTER"/>
+	</resultMap>	
+	
+  	<insert id="lostDAO.insertLost">
+		INSERT INTO KU_LOST
+			(LOST_TITLE,LOST_SELECTER,LOST_WRITER,LOST_CONTENT,LOST_LOCATION)
+		VALUES
+			 (#lostTitle#, #lostSelecter#, #lostWriter#, #lostContent#, #lostLocation#)
+		<selectKey keyProperty="lostIdx" resultClass="String">
+			SELECT @@IDENTITY
+		</selectKey>				 
+	</insert>
+
+	<update id="lostDAO.updateLost">
+		UPDATE 
+			KU_LOST
+	    SET
+			LOST_TITLE = #lostTitle#,
+			LOST_CONTENT = #lostContent#,
+			LOST_LOCATION = #lostLocation#,
+			LOST_MODDATE = NOW()
+		WHERE
+			LOST_IDX = #lostIdx#
+	</update>
+	
+	
+	<select id="lostDAO.selectLostList"  resultClass="egovMap">
+	
+		SELECT
+			L.*, 
+			U.USR_NICKNAME,
+			(SELECT FILE_SRV_FILE FROM KU_FILE WHERE FILE_TBL_IDX = L.LOST_IDX AND FILE_TBL_CODE = '5' AND FILE_DEL_YN = "N" ORDER BY FILE_IDX ASC LIMIT 1) AS FIRST
+		FROM 
+			KU_LOST AS L,
+			KU_USER AS U
+		WHERE
+			L.LOST_WRITER = U.USR_IDX
+		AND
+			NOT LOST_STATUS = '0'
+
+ 	    <isNotEmpty prepend="AND" property="lostSelecter">
+				L.LOST_IDX IN((SELECT LOST_IDX FROM KU_LOST
+									WHERE 
+										LOST_SELECTER = #lostSelecter# 
+				 ))
+		</isNotEmpty>	
+
+	    <isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="">
+				L.LOST_IDX IN((SELECT LOST_IDX FROM KU_LOST
+									WHERE 
+										LOST_TITLE LIKE  CONCAT('%', #searchKeyword# , '%') 
+									OR
+										LOST_CONTENT LIKE CONCAT('%', #searchKeyword# , '%')
+									OR
+										LOST_LOCATION LIKE CONCAT('%', #searchKeyword# , '%')
+				 ))
+			</isEqual>
+		</isNotEmpty>	
+
+		ORDER BY
+			LOST_WRITEDATE DESC
+		LIMIT 
+			#firstIndex#,#pageUnit#
+	</select>	
+	
+	<select id="lostDAO.selectLostByIdx" resultClass="egovMap">
+		SELECT 
+			L.*, 
+			U.USR_NICKNAME,
+			(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_IDX = L.LOST_IDX AND FILE_DEL_YN = "N" AND FILE_TBL_CODE = #fileTblCode#) AS FILE_CNT,
+			(SELECT USR_SRVPROFILEPIC FROM KU_USER WHERE USR_IDX = L.LOST_WRITER) AS PROFILE
+		FROM
+			KU_LOST AS L,
+			KU_USER AS U
+		WHERE
+			L.LOST_WRITER = U.USR_IDX
+		AND
+			NOT L.LOST_STATUS = '0'
+		AND
+			L.LOST_IDX = #lostIdx#;
+	</select>
+	
+	
+	<select id="lostDAO.lostFileList" resultClass="egovMap">
+		SELECT 
+			*
+		FROM
+			KU_FILE
+		WHERE
+			FILE_TBL_IDX = #lostIdx#
+		AND
+			FILE_TBL_CODE = 5
+		AND
+			FILE_DEL_YN = 'N'
+	</select>		
+	
+	<update id="lostDAO.delLost">
+		UPDATE 
+			KU_LOST
+	    SET
+			LOST_STATUS   = '0',
+			LOST_MODDATE = NOW()
+		WHERE
+			LOST_IDX = #lostIdx#
+	</update>	
+	
+	<update id="lostDAO.updateStaLost">
+		UPDATE 
+			KU_LOST
+	    SET
+			LOST_STATUS   = #lostStatus#,
+			LOST_MODDATE = NOW()
+		WHERE
+			LOST_IDX = #lostIdx#
+	</update>	
+	
+	
+</sqlMap>

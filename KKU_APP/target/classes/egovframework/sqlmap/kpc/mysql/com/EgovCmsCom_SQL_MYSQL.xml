@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="commonDAO">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+    <typeAlias  alias="comCodeVO" type="egovframework.cms.com.service.EgovCmsComCodeVO"/>
+
+ 	<resultMap id="comCodeMap" class="egovframework.cms.com.service.EgovCmsComCodeVO">
+		<result property="cdVal1" column="CD_VAL_1" columnIndex="1"/>
+		<result property="cdVal2" column="CD_VAL_2" columnIndex="2"/>
+		<result property="cdName1" column="CD_NAME_1" columnIndex="3"/>		
+		<result property="cdName2" column="CD_NAME_2" columnIndex="4"/>
+		<result property="cdSort" column="CD_SORT" columnIndex="5"/>
+		<result property="useYn" column="USE_YN" columnIndex="6"/>
+	</resultMap>
+
+ 	<resultMap id="comMemberCodeMap" class="egovframework.cms.com.service.EgovCmsComCodeVO">
+		<result property="cdVal1" column="CD_VAL_1" columnIndex="1"/>
+		<result property="cdVal2" column="CD_VAL_2" columnIndex="2"/>
+		<result property="cdName1" column="CD_NAME_1" columnIndex="3"/>		
+		<result property="cdName2" column="CD_NAME_2" columnIndex="4"/>
+		<result property="cdSort" column="CD_SORT" columnIndex="5"/>
+		<result property="useYn" column="USE_YN" columnIndex="6"/>
+	</resultMap>
+	
+	
+	
+	<select id="commonDAO.getComCodeList" parameterClass="string" resultClass="egovMap">
+		<![CDATA[
+		SELECT
+			CD_VAL_1
+			, CD_VAL_2
+			, CD_NAME_1
+			, CD_NAME_2
+			, CD_SORT
+			, USE_YN
+		FROM
+			tw_code
+		WHERE
+			CD_VAL_1 = #value#
+		AND
+			USE_YN = 'Y'
+		ORDER BY
+			CD_NAME_2 ASC
+		]]>
+	</select>
+	
+	<select id="commonDAO.getComCodeList2" parameterClass="string" resultClass="egovMap">
+		<![CDATA[
+		SELECT DISTINCT
+			CD_VAL_2
+		FROM
+			TW_CODE
+		WHERE
+			CD_VAL_1 = #value#
+		AND
+			USE_YN = 'Y'
+		AND
+			CD_VAL_2 IS NOT NULL
+		ORDER BY
+			CD_VAL_2 ASC
+		]]>
+	</select>
+	
+	<select id="commonDAO.getComCodeList3" parameterClass="string" resultClass="egovMap">
+		<![CDATA[
+		SELECT
+			CD_VAL_1
+			, CD_VAL_2
+			, CD_NAME_1
+			, CD_NAME_2
+			, CD_SORT
+			, USE_YN
+			, ETC
+		FROM
+			TW_CODE
+		WHERE
+			CD_VAL_1 = #value#
+		AND
+			USE_YN = 'Y'
+		ORDER BY
+			CD_SORT ASC
+		]]>
+	</select>
+	
+	<select id="commonDAO.getComCodeList4" parameterClass="string" resultClass="egovMap">
+		<![CDATA[
+		SELECT
+			 cd_val_1
+		      ,cd_val_2
+		      ,cd_name_1_en
+		      ,cd_name_2_en
+		      ,cd_sort
+		FROM
+			KONECTMASTER.dbo.TM_MEMBER_CODE
+		WHERE
+			cd_val_1 = #value#
+		AND
+			use_yn = 'Y'
+		ORDER BY
+			cd_name_2_en ASC
+		]]>
+	</select>
+	
+	<select id="commonDAO.getComMemCodeList" parameterClass="string" resultClass="egovMap">
+		<![CDATA[
+		SELECT
+			CD_VAL_1
+			, CD_VAL_2
+			, CD_NAME_1
+			, CD_NAME_2
+			, CD_NAME_1_EN
+			, CD_NAME_2_EN
+			, CD_SORT
+			, USE_YN
+		FROM
+			TM_MEM_CODE
+		WHERE
+			CD_VAL_1 = #value#
+		AND
+			USE_YN = 'Y'
+		ORDER BY
+			CD_SORT ASC
+		]]>
+	</select>
+
+	<select id="commonDAO.getComMemberCodeList" parameterClass="string" resultClass="egovMap">
+		<![CDATA[
+		SELECT
+			CD_VAL_1
+			, CD_VAL_2
+			, CD_NAME_1
+			, CD_NAME_2
+			, CD_SORT
+			, USE_YN
+		FROM
+			KONECTMASTER.dbo.TM_MEMBER_CODE
+		WHERE
+			CD_VAL_1 = #value#
+		AND
+			USE_YN = 'Y'
+		ORDER BY
+			CD_SORT ASC
+		]]>
+	</select>
+
+	<select id="commonDAO.getCommConfigSelectById" parameterClass="string" resultClass="egovMap">
+		<![CDATA[
+			SELECT CFG_VAL FROM TW_CONFIG WHERE CFG_CD = #cfgCd#
+		]]>
+	</select>
+
+	<select id="commonDAO.getBcfInfoByBcfId" parameterClass="string" resultClass="egovMap">
+		<![CDATA[
+		SELECT
+			  TBC.BCF_IDX
+			, TBC.BCF_ID
+			, TBC.BCF_NAME
+			, TBC.REC_PER_PAGE
+			, TBCS.SKN_PATH
+			, TBC.SECRET_USE_YN
+    		, TBC.NOTICE_USE_YN
+    		, TBC.COMMENT_USE_YN
+    		, TBC.TOP_INFO
+    		, TBC.ATTACH_CNT
+    		, TBC.USR_WRITE_YN
+    		, TBC.IMG_AUTO_DISP
+		FROM
+			TW_BOARD_CONFIG TBC
+		INNER JOIN
+			TW_BOARD_CONFIG_SKIN TBCS
+		ON
+			TBCS.SKN_IDX = TBC.SKN_IDX
+		AND
+			TBCS.USE_YN = 'Y'
+		WHERE
+			TBC.BCF_ID = #bcfId#
+		AND
+			TBC.USE_YN = 'Y'
+		]]>
+	</select>
+
+	<select id="commonDAO.getMenuInfoByMenuId" parameterClass="HashMap" resultClass="egovMap">
+		<![CDATA[
+		SELECT
+			MENU_IDX
+		FROM
+			TW_MENU
+		WHERE
+			MENU_ID = #menuId#
+		AND
+			SITE_CD = #siteCd#
+		AND
+			DEL_YN = 'N'
+		AND
+			USE_YN = 'Y'
+		]]>
+	</select>
+
+	<insert id="commonDAO.smsSendInsert">
+		INSERT INTO em_tran (
+			tran_id,
+			tran_phone,
+			tran_callback,
+			tran_status,
+			tran_date,
+			tran_msg,
+			tran_etc1,
+			tran_type 
+		) VALUES (
+			#tranId#,
+			#tranPhone#,
+			#tranCallback#,
+			'1',
+			now(),
+			#tranMsg#,
+			#tranEtc1#,
+			#tranType#
+		);
+	</insert>
+</sqlMap>

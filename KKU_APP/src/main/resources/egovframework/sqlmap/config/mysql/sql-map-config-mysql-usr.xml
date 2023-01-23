@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMapConfig PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-config-2.dtd" >
+
+<sqlMapConfig>
+	<sqlMap resource="egovframework/sqlmap/kku/usr/EgovKkuApp_Login_SQL.xml" />
+	<sqlMap resource="egovframework/sqlmap/kku/usr/EgovKkuApp_Mypage_SQL.xml" />
+	<sqlMap resource="egovframework/sqlmap/kku/usr/EgovKkuApp_Board_SQL.xml" />
+	<sqlMap resource="egovframework/sqlmap/kku/usr/EgovKkuApp_Restaurant_SQL.xml" />
+	<sqlMap resource="egovframework/sqlmap/kku/usr/EgovKkuApp_Room_SQL.xml" />
+	<sqlMap resource="egovframework/sqlmap/kku/usr/EgovKkuApp_MajorNotice_SQL.xml" />
+	<sqlMap resource="egovframework/sqlmap/kku/usr/EgovKkuApp_Crawler_SQL.xml" />
+	<sqlMap resource="egovframework/sqlmap/kku/usr/EgovKkuApp_ThemeBoard_SQL.xml" />
+	<sqlMap resource="egovframework/sqlmap/kku/usr/EgovKkuApp_Timetable_SQL.xml" />
+	<sqlMap resource="egovframework/sqlmap/kku/usr/EgovKkuApp_Report_SQL.xml" />
+	<sqlMap resource="egovframework/sqlmap/kku/usr/EgovKkuApp_Club_SQL.xml" />
+	<sqlMap resource="egovframework/sqlmap/kku/usr/EgovKkuApp_Lost_SQL.xml" />
+	<sqlMap resource="egovframework/sqlmap/kku/usr/EgovKkuApp_Taxi_SQL.xml" />
+	<sqlMap resource="egovframework/sqlmap/kku/usr/EgovKkuApp_Chat_SQL.xml" />
+	<sqlMap resource="egovframework/sqlmap/kku/usr/EgovKkuApp_UserLicense_SQL_MYSQL.xml" />
+	<sqlMap resource="egovframework/sqlmap/kku/usr/EgovKkuApp_LICENSE_API_SQL_MYSQL.xml" />
+	
+</sqlMapConfig>

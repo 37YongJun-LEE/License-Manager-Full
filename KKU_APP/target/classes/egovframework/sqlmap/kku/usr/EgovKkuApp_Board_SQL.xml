@@ -1,0 +1,483 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="mainB">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  	<typeAlias  alias="EgovKkuAppCommunityVO" type="egovframework.kku.usr.service.EgovKkuAppCommunityVO"/>
+
+  	<resultMap id="communitypMap" class="egovframework.kku.usr.service.EgovKkuAppCommunityVO">
+  	    <result property="likeNum" column="LIKE_NUM"/>
+  	    <result property="usrNickname" column="USR_NICKNAME"/>
+  	    <result property="usrMajor" column="USR_MAJOR"/>
+  	    <result property="usrStdnum" column="USR_STDNUM"/>
+  	    <result property="fileCnt" column="FILE_CNT"/>
+  	    <result property="usrSrvprofilepic" column="USR_SRVPROFILEPIC"/>
+  	    
+		<result property="boardIdx" column="BOARD_IDX"/>
+    	<result property="boardWriter" column="BOARD_WRITER"/>
+    	<result property="boardTitle" column="BOARD_TITLE" />
+    	<result property="boardContent" column="BOARD_CONTENT" />
+        <result property="boardWritedate" column="BOARD_WRITEDATE" /> 
+    	<result property="boardViewnum" column="BOARD_VIEWNUM" />
+
+    	<result property="boardName" column="BOARD_NAME" />
+    	<result property="boardDetailname" column="BOARD_DETAILNAME" />
+    	
+	</resultMap>
+  	
+  	<select id="communityDAO.selectAllHBoardList" resultClass="egovMap">
+	    SELECT *,DATE_FORMAT(kb.BOARD_WRITEDATE ,'%Y.%m.%d-%H:%i') AS BOARD_WRITEDATE 
+	    , (select COUNT(*) from KU_BOARDLIKE as l where l.BOARD_IDX = kb.BOARD_IDX) AS LIKE_NUM
+	    , (select COUNT(*) from KU_REPLY as r where r.BOARD_IDX = kb.BOARD_IDX  ) as REPLY_NUM
+		, (select u.USR_NICKNAME from KU_USER as u where u.USR_EMAIL = kb.BOARD_WRITER  ) as USR_NICKNAME,
+		FROM KU_BOARD kb 
+		where BOARD_NAME !="Mboard" and kb.
+		HAVING (select COUNT(*) from KU_BOARDLIKE as l where l.BOARD_IDX = kb.BOARD_IDX) >15	
+	    ORDER BY (select COUNT(*) from KU_BOARDLIKE as l where l.BOARD_IDX = kb.BOARD_IDX) DESC
+	    
+	</select>
+  
+	<select id ="communityDAO.showBoardDetail" parameterClass="EgovKkuAppCommunityVO" resultMap="communitypMap">
+	    select ku.USR_NICKNAME , ku.USR_MAJOR ,ku.USR_STDNUM , kb.BOARD_IDX ,kb.BOARD_TITLE ,kb.BOARD_DETAILNAME , kb.BOARD_CONTENT,DATE_FORMAT(kb.BOARD_WRITEDATE ,'%Y.%m.%d-%H:%i') AS BOARD_WRITEDATE , kb.BOARD_VIEWNUM, kb.BOARD_WRITER, kb.BOARD_NAME,ku.USR_SRVPROFILEPIC,
+		(SELECT COUNT(*) FROM KU_BOARDLIKE AS l where l.BOARD_IDX = #boardIdx# and l.BOARD_NAME = #boardName#) as LIKE_NUM,
+		(SELECT COUNT(*) FROM KU_FILE AS f WHERE f.FILE_TBL_CODE = 1 AND f.FILE_TBL_IDX = kb.BOARD_IDX AND f.FILE_DEL_YN = "N") as FILE_CNT
+		from KU_BOARD kb inner join KU_USER ku 
+		on kb.BOARD_WRITER  = ku.USR_EMAIL 
+		where kb.BOARD_IDX = #boardIdx# 
+		
+	  </select>
+	<!-- 통합 필요   -->
+	<select id="communityDAO.showTopThree" resultClass="egovMap">
+	    SELECT *, (select COUNT(*) from KU_BOARDLIKE as l where l.BOARD_IDX = kb.BOARD_IDX) AS BOARD_LIKE,
+		(select COUNT(*) from KU_REPLY as r where r.BOARD_IDX = kb.BOARD_IDX  ) as REPLY_NUM,
+		(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_CODE = 1 AND FILE_TBL_IDX = kb.BOARD_IDX AND FILE_DEL_YN = "N") AS FILE_CNT,
+		(SELECT FILE_SRV_FILE FROM KU_FILE  WHERE FILE_TBL_CODE = 1 AND FILE_TBL_IDX = kb.BOARD_IDX AND FILE_DEL_YN = "N" ORDER BY FILE_IDX ASC LIMIT 1) AS FIRST
+		FROM KU_BOARD kb 
+		where BOARD_NAME !="Mboard" and BOARD_STATUS = 1
+		HAVING (select COUNT(*) from KU_BOARDLIKE as l where l.BOARD_IDX = kb.BOARD_IDX) >3
+		ORDER BY (select COUNT(*) from KU_BOARDLIKE as l where l.BOARD_IDX = kb.BOARD_IDX) DESC
+		LIMIT #cnt#
+
+	   	
+	</select>
+	
+	<!-- 해당 게시물 댓글 수 카운트  -->
+	<select id="communityDAO.getReplyNum" resultClass="java.lang.Integer">
+	    SELECT 
+			COUNT(*) TOTAL 
+		FROM 
+			KU_LIKE
+		WHERE 
+			BOARD_IDX = #boardIdx# AND BOARD_NAME = #boardName#
+	    
+	</select>
+   	
+	<!-- 해당 게시물 좋아요 수 카운트 ? -->
+	<select id="communityDAO.getLikeNum" resultClass="java.lang.Integer">
+	     SELECT 
+			COUNT(*) TOTAL 
+		FROM 
+			KU_REPLY
+		WHERE 
+			BOARD_IDX = #boardIdx# AND BOARD_NAME = #boardName#
+	    
+	</select>
+	
+	
+	
+	<select id="communityDAO.showFriendList" resultClass="egovMap">
+	    SELECT 
+	    	U.USR_IDX, U.USR_EMAIL ,U.USR_NICKNAME,U.USR_NAME, U.USR_SRVPROFILEPIC , U.USR_RANK, F.FRIEND_ISFAV <!-- 유저랭크는 시연용 임시로 불러옴  -->
+		FROM 		
+			KU_USER AS U INNER JOIN KU_FRIEND AS F
+		ON 	
+			F.FRIEND_MY_IDX = #usrIdx# 
+		AND 
+			U.USR_EMAIL  = F.FRIEND_FID
+		AND
+			F.FRIEND_STATUS = '1'
+
+	</select>
+	
+	
+	<select id="communityDAO.getCNTfriendProfile" resultClass="egovMap">
+		SELECT 
+	     (select count(*) from KU_FRIEND WHERE FRIEND_MY_IDX = #usrIdx# AND NOT FRIEND_STATUS = '0') as friendCNT,
+	     (select count(*) from KU_TRADE WHERE TRD_USR_IDX = #usrIdx# AND NOT TRD_STATUS = '0') as tradeCNT,
+	     <!-- 게시판 작업완료되면 수정필요 -->(select count(*) from KU_BOARD  WHERE BOARD_WRITER  = #usrIdx# AND NOT BOARD_STATUS = '0') as boardCNT
+	     from dual;
+	</select>
+	
+	<insert id  = "communityDAO.replyInsert">
+	    INSERT INTO
+	    	KU_REPLY ( BOARD_IDX, BOARD_NAME, BOARD_DETAILNAME, REPLY_WRITER, REPLY_CONTENT, REPLY_WRITEDATE)
+	    	VALUES(  
+	  		  	#boardIdx#, 
+	  		  	#boardName#, 
+	    		#boardDetailname#,
+	    		#replyWriter#,
+	    		#replyContent#,
+	    		sysdate()
+	    	 )
+	  			
+	</insert>
+	<select id ="communityDAO.getReplyList" resultClass="egovMap">
+	   	SELECT
+	   		 u.USR_NICKNAME , r.REPLY_IDX ,r.REPLY_CONTENT ,DATE_FORMAT(r.REPLY_WRITEDATE,'%Y.%m.%d-%H:%i') as REPLY_WRITEDATE,r.REPLY_WRITER,
+	   		 (select count(*) from KU_REPLYLIKE as rl where rl.REPLY_IDX = r.REPLY_IDX and rl.BOARD_CODE = 1) as LIKE_NUM
+		FROM
+			 KU_REPLY as r inner join KU_USER as u 
+		ON
+			 u.USR_EMAIL = r.REPLY_WRITER 
+		WHERE
+			 r.BOARD_IDX = #boardIdx#
+			 AND r.BOARD_NAME = #boardName#
+		ORDER BY r.REPLY_WRITEDATE DESC
+	   </select>  
+	
+	<insert id="communityDAO.insertAlarm">
+	    INSERT INTO
+	    	KU_ALARM (ALARM_TIME, ALARM_RECEIVERID,REQUESTED_ID ,READ_YN, BOARD_IDX, BOARD_DETAILNAME, ALARM_TYPE)
+	    	VALUES (sysdate(), #alarmReceiverid#, #requestedId# ,0,#boardIdx#,#boardDetailname#, #alarmType# )
+	    	
+	</insert>
+	<insert id="kcommunityDAO.insertBoardFile">
+	    INSERT INTO KU_FILE(
+		    FILE_TBL_IDX,
+		    FILE_TBL_CODE,
+		    FILE_USR_FILE,
+		    FILE_SRV_FILE,
+		    FILE_DEL_YN,
+		    FILE_REG_IDX,
+		    FILE_REG_NICK,
+		    FILE_MOD_DATE,
+		    BF_TYPE
+		) VALUES (
+			#fileTblIdx#,
+			#fileTblCode#,
+		    #fileUsrFile#,
+		    #fileSrvFile#,
+		    'N',
+		    #fileRegIdx#,
+		    #fileRegNick#,
+			NOW(),
+			#bfType#
+		)
+	</insert>
+	<select id ="communityDAO.getAlarmList" resultClass="egovMap">
+	 select DISTINCT  * from KU_ALARM ka 
+inner join KU_USER ku 
+		on ku.USR_EMAIL = ka.REQUESTED_ID
+		left outer join KU_BOARD kb on kb.BOARD_IDX = ka.BOARD_IDX 
+		left outer join KU_TBOARD kt on kt.TBOARD_IDX = ka.BOARD_IDX 
+	WHERE ALARM_RECEIVERID = #alarmReceiverid#
+			order by ka.ALARM_TIME DESC 
+	</select>
+	
+	<select id="communityDAO.cntAlarm" resultClass="java.lang.Integer">
+	    select count(*)
+	    from KU_ALARM
+	    WHERE ALARM_RECEIVERID = #usrid# AND READ_YN = 0 
+	</select> 
+	
+	<update id="communityDAO.updateReadAll">
+	    	UPDATE KU_ALARM
+	    	SET READ_YN = 1
+	    	WHERE ALARM_RECEIVERID = #usrid#
+	</update>
+	<delete id="communityDAO.deleteAll">
+	    DELETE FROM 
+	    	KU_ALARM
+	    WHERE 
+	    	ALARM_RECEIVERID = #usrid#
+	</delete>
+	
+	<!--  해당 게시판의 정보 -->
+	<select id ="communityDAO.getBoardList" resultClass="egovMap">
+	   SELECT kb.BOARD_IDX, kb.BOARD_TITLE ,kb.BOARD_CONTENT , kb.BOARD_NAME , kb.BOARD_WRITEDATE, kb.BOARD_VIEWNUM,
+		(select u.USR_NICKNAME  from KU_USER  as u where u.USR_EMAIL = kb.BOARD_WRITER  ) as USR_NICKNAME ,
+		(select COUNT(*) from KU_REPLY as r where r.BOARD_IDX = kb.BOARD_IDX and r.BOARD_DETAILNAME = #bName# ) as REPLY_NUM,
+		(select COUNT(*) from  KU_BOARDLIKE as kb2  where kb2.BOARD_IDX = kb.BOARD_IDX and kb2.BOARD_DETAILNAME = #bName# ) AS LIKE_NUM,
+		(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_CODE = 1 AND FILE_TBL_IDX = kb.BOARD_IDX AND FILE_DEL_YN = "N") AS FILE_CNT,
+			(SELECT FILE_SRV_FILE FROM KU_FILE  WHERE FILE_TBL_CODE = 1 AND FILE_TBL_IDX = kb.BOARD_IDX AND FILE_DEL_YN = "N" ORDER BY FILE_IDX ASC LIMIT 1) AS FIRST
+		from KU_BOARD kb
+		WHERE kb.BOARD_DETAILNAME = #bName#
+		ORDER BY kb.BOARD_IDX DESC
+	</select>
+	<!--  해당 게시물 사진 불러오기 -->
+	<select id="kcommunityDAO.boardFileList" resultClass="egovMap">
+		SELECT 
+			*
+		FROM
+			KU_FILE
+		WHERE
+			FILE_TBL_IDX = #boardIdx#
+		AND
+			FILE_TBL_CODE = 1
+		AND
+			FILE_DEL_YN = 'N'
+	</select>	
+	
+	<!-- 해당 게시판 게시물 수  -->
+	<select id = "communityDAO.cntBoardList" resultClass="java.lang.Integer">
+	    SELECT COUNT(*)
+	FROM KU_BOARD
+	WHERE BOARD_DETAILNAME = #bName#
+	</select>
+	
+	<insert id="kcommunityDAO.insertBoard">
+	    INSERT INTO
+	    	KU_BOARD (BOARD_WRITER,BOARD_TITLE ,BOARD_CONTENT, BOARD_WRITEDATE,BOARD_VIEWNUM,BOARD_STATUS, BOARD_NAME, BOARD_DETAILNAME)
+	    	VALUES ( #boardWriter#,#boardTitle#,#boardContent#,sysdate(),#boardViewnum#,1,#boardName#,#boardDetailname#)
+	    <selectKey keyProperty="boardIdx" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY
+		</selectKey>		
+	</insert>
+	
+	<update id="communityDAO.updateViewCnt">
+	    UPDATE 
+	    	KU_BOARD
+	    SET
+	    	BOARD_VIEWNUM = BOARD_VIEWNUM + 1
+	    WHERE
+	    	BOARD_IDX= #boardIdx# AND BOARD_NAME = #boardName#
+	    
+	</update>
+	
+	<select id = "communityDAO.chkLiked" resultClass="java.lang.Integer">
+	    select count(*)
+	    from KU_BOARDLIKE
+	    WHERE LIKE_USRNAME = #usrId# and BOARD_IDX = #boardIdx# and BOARD_CODE = #boardCode#
+	    
+	</select>
+	<insert id="communityDAO.insertLike">
+	    INSERT INTO
+	    	KU_BOARDLIKE(BOARD_IDX, BOARD_DETAILNAME,BOARD_NAME,LIKE_USRNAME,BOARD_CODE)
+	    	VALUES(#boardIdx#,#boardDetailname#,#boardName#,#usrId#,#boardCode#)
+	</insert>
+	<update id="kcommunityDAO.updateBoard">
+	      UPDATE 
+	    	KU_BOARD
+	    SET
+	    	BOARD_CONTENT = #boardContent# , BOARD_TITLE = #boardTitle#
+	    WHERE
+	    	BOARD_IDX= #boardIdx# AND BOARD_NAME = #boardName#
+	</update>
+	
+	<select id="kcommunityDAO.selectBoardListCnt" resultClass="int">
+		SELECT
+			COUNT(*)
+		FROM
+			KU_BOARD AS k
+		WHERE
+			BOARD_DETAILNAME = #boardDetailname# AND k.BOARD_STATUS = 1
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="boardTitle">
+				k.BOARD_TITLE LIKE CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="boardContent">
+				k.BOARD_CONTENT LIKE CONCAT('%', #searchKeyword#, '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="usrNickname">
+				k.BOARD_WRITER IN(SELECT USR_EMAIL FROM KU_USER WHERE USR_NICKNAME LIKE CONCAT('%', #searchKeyword#, '%'))
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="All">
+				(k.BOARD_TITLE LIKE CONCAT('%',#searchKeyword#, '%')
+			OR 
+				k.BOARD_CONTENT LIKE CONCAT('%', #searchKeyword# , '%')
+			OR 
+				k.BOARD_WRITER IN(SELECT USR_EMAIL FROM KU_USER WHERE USR_NICKNAME LIKE CONCAT('%', #searchKeyword#, '%')))
+			</isEqual>
+		</isNotEmpty>
+	</select>
+	<select id="kcommunityDAO.selectBoardList" resultClass="egovMap">
+		SELECT 
+			k.*,
+			(SELECT COUNT(*) FROM kku_app.KU_LIKE WHERE BOARD_IDX = k.BOARD_IDX) AS LIKE_CNT,
+			(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_IDX = k.BOARD_IDX AND FILE_DEL_YN = "N") AS FILE_CNT,
+			(SELECT FILE_SRV_FILE FROM KU_FILE WHERE FILE_TBL_IDX = k.BOARD_IDX AND FILE_DEL_YN = "N" ORDER BY FILE_IDX ASC LIMIT 1) AS FIRST,
+			(select u.USR_NICKNAME from KU_USER as u where u.USR_EMAIL = k.BOARD_WRITER  ) as USR_NICKNAME ,
+			(select COUNT(*) from KU_REPLY as r where r.BOARD_IDX = k.BOARD_IDX and r.BOARD_DETAILNAME = #boardDetailname# ) as REPLY_NUM,
+			(select COUNT(*) from KU_BOARDLIKE as kb2 where kb2.BOARD_IDX = k.BOARD_IDX and kb2.BOARD_DETAILNAME = #boardDetailname# ) AS LIKE_NUM
+		FROM 
+			KU_BOARD AS k
+		WHERE
+			BOARD_DETAILNAME = #boardDetailname# and k.BOARD_STATUS = 1
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="boardTitle">
+				k.BOARD_TITLE LIKE CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="boardContent">
+				k.BOARD_CONTENT LIKE CONCAT('%', #searchKeyword#, '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="usrNickname">
+				k.BOARD_WRITER IN(SELECT USR_EMAIL FROM KU_USER WHERE USR_NICKNAME LIKE CONCAT('%', #searchKeyword#, '%'))
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="All">
+				(k.BOARD_TITLE LIKE CONCAT('%',#searchKeyword#, '%')
+			OR 
+				k.BOARD_CONTENT LIKE CONCAT('%', #searchKeyword# , '%')
+			OR 
+				k.BOARD_WRITER IN(SELECT USR_EMAIL FROM KU_USER WHERE USR_NICKNAME LIKE CONCAT('%', #searchKeyword#, '%')))
+			</isEqual>
+		</isNotEmpty>
+		ORDER BY k.BOARD_IDX DESC
+		LIMIT 
+			#firstIndex#,#pageUnit#
+	</select>
+	
+	<select id="kcommunityDAO.selectBoardTopList" resultClass="egovMap">
+		SELECT 
+			k.*,
+			(SELECT COUNT(*) FROM kku_app.KU_LIKE WHERE BOARD_IDX = k.BOARD_IDX) AS LIKE_CNT,
+			(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_IDX = k.BOARD_IDX AND FILE_DEL_YN = "N") AS FILE_CNT,
+			(SELECT FILE_SRV_FILE FROM KU_FILE WHERE FILE_TBL_IDX = k.BOARD_IDX AND FILE_DEL_YN = "N" ORDER BY FILE_IDX ASC LIMIT 1) AS FIRST,
+			(select u.USR_NICKNAME from KU_USER as u where u.USR_EMAIL = k.BOARD_WRITER  ) as USR_NICKNAME ,
+			(select COUNT(*) from KU_REPLY as r where r.BOARD_IDX = k.BOARD_IDX and r.BOARD_DETAILNAME = #boardDetailname# ) as REPLY_NUM,
+			(select COUNT(*) from KU_BOARDLIKE as kb2 where kb2.BOARD_IDX = k.BOARD_IDX and kb2.BOARD_DETAILNAME = #boardDetailname# ) AS LIKE_NUM
+		FROM 
+			KU_BOARD AS k
+		WHERE
+			BOARD_DETAILNAME = #boardDetailname# AND k.BOARD_STATUS =1 
+		AND
+			(select COUNT(*) from KU_BOARDLIKE as kb2 where kb2.BOARD_IDX = k.BOARD_IDX and kb2.BOARD_DETAILNAME = #boardDetailname# ) >= "3"
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="boardTitle">
+				k.BOARD_TITLE LIKE CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="boardContent">
+				k.BOARD_CONTENT LIKE CONCAT('%', #searchKeyword#, '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="usrNickname">
+				k.BOARD_WRITER IN(SELECT USR_EMAIL FROM KU_USER WHERE USR_NICKNAME LIKE CONCAT('%', #searchKeyword#, '%'))
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="All">
+				(k.BOARD_TITLE LIKE CONCAT('%',#searchKeyword#, '%')
+			OR 
+				k.BOARD_CONTENT LIKE CONCAT('%', #searchKeyword# , '%')
+			OR 
+				k.BOARD_WRITER IN(SELECT USR_EMAIL FROM KU_USER WHERE USR_NICKNAME LIKE CONCAT('%', #searchKeyword#, '%')))
+			</isEqual>
+		</isNotEmpty>
+		ORDER BY k.BOARD_IDX DESC
+		LIMIT 
+			#firstIndex#,#pageUnit#
+	</select>
+	<select id="kcommunityDAO.selectBoardTopListCnt" resultClass="int">
+		SELECT
+			COUNT(*)
+		FROM
+			KU_BOARD AS k
+		WHERE
+			BOARD_DETAILNAME = #boardDetailname# AND k.BOARD_STATUS =1 
+		AND
+			(select COUNT(*) from KU_BOARDLIKE as kb2 where kb2.BOARD_IDX = k.BOARD_IDX and kb2.BOARD_DETAILNAME = #boardDetailname# ) >= "3"
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="boardTitle">
+				k.BOARD_TITLE LIKE CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="boardContent">
+				k.BOARD_CONTENT LIKE CONCAT('%', #searchKeyword#, '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="usrNickname">
+				k.BOARD_WRITER IN(SELECT USR_EMAIL FROM KU_USER WHERE USR_NICKNAME LIKE CONCAT('%', #searchKeyword#, '%'))
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="All">
+				(k.BOARD_TITLE LIKE CONCAT('%',#searchKeyword#, '%')
+			OR 
+				k.BOARD_CONTENT LIKE CONCAT('%', #searchKeyword# , '%')
+			OR 
+				k.BOARD_WRITER IN(SELECT USR_EMAIL FROM KU_USER WHERE USR_NICKNAME LIKE CONCAT('%', #searchKeyword#, '%')))
+			</isEqual>
+		</isNotEmpty>
+	</select>
+	
+	<update id="kcommunityDAO.updateBoardDelete">
+	   UPDATE 
+	   		KU_BOARD
+	   	SET 
+	   		BOARD_STATUS = 0 
+	    WHERE
+	    	BOARD_IDX = #boardIdx# 
+	</update>
+	
+	
+	
+<!-- 관리자에서 게시물 삭제할때 사용하기 -->
+	<delete id="communityDAO.boardDelete">
+	    DELETE FROM KU_BOARD
+	    WHERE
+	    	BOARD_IDX = #boardIdx# and BOARD_DETAILNAME = #boardDetailname#
+	</delete>
+	
+	<delete id="communityDAO.boardReplyDelete">
+	     DELETE FROM KU_REPLY
+	    WHERE
+	    	BOARD_IDX = #boardIdx# and BOARD_DETAILNAME = #boardDetailname#
+	</delete>
+	
+	<delete id="communityDAO.boardLikeDelete">
+	     DELETE FROM KU_BOARD
+	    WHERE
+	    	BOARD_IDX = #boardIdx# and BOARD_DETAILNAME = #boardDetailname#
+	</delete>
+	
+	
+	<!-- 댓글 좋아요 , 좋아요 체크 -->
+	<insert id="kcommunityDAO.insertReplyLike">
+	    INSERT INTO KU_REPLYLIKE
+		(REPLY_IDX,LIKE_USRID,BOARD_CODE)
+	VALUES
+		(#replyIdx#,#likeUsrid#,#boardCode#)
+	</insert>
+	<select id="kcommunityDAO.chkReplyLiked" resultClass="java.lang.Integer" >
+	    select count(*)
+	    from KU_REPLYLIKE
+	    WHERE 
+	    	REPLY_IDX = #replyIdx# AND
+	    	LIKE_USRID = #likeUsrid# AND
+	    	BOARD_CODE = #boardCode#
+	    	
+	    
+	</select>
+	<update id = "kcommunityDAO.setAlarmRead">
+	    UPDATE 
+	    	KU_ALARM
+	    SET 
+	    	READ_YN = 1
+	    WHERE ALARM_IDX = #alarmIdx#
+	</update>
+	
+	<insert id="kcommunityDAO.insertReport">
+	    INSERT INTO KU_REPORT_LIST
+		(
+		 REPORTER_IDX,
+		 WRITER_IDX,
+		 CONTENT,
+		 REPORT_TBL_CODE,
+		 REPORT_BOARD_IDX ,
+		 REPORT_DATE,
+		 REPORT_CATEGORY, 
+		 REPORT_STATE , 
+		 REPORT_PROCESSDATE, 
+		 REPORT_PROCESSPERSON,
+		 REPORT_PROCESSCOMMENT,
+		 REPORT_PAGEURL
+		 )
+	VALUES
+		(
+		#reporterIdx#,
+		#writerIdx#,
+		#content#,
+		#reportTblCode#,
+		#reportBoardIdx#,
+		sysdate(),
+		#reportCategory#,
+		#reportState#,
+		#reportProcessdate#,
+		#reportProcessperson#,
+		#reportProcesscomment#,
+		#reportPageurl#
+		)
+	</insert>
+	
+</sqlMap>

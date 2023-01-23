@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="mypageDAO">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+    
+    <resultMap id="mypageMap" class="egovframework.kku.usr.service.EgovKkuAppUserVO">
+		<result property="usrEmail" column="USR_EMAIL" />
+		<result property="usrNickname" column="USR_NICKNAME" />		
+		<result property="usrName" column="USR_NAME" />		
+		<result property="usrMajor" column="USR_MAJOR" />
+		<result property="usrStdnum" column="USR_STDNUM" />		
+		<result property="usrProfilepic" column="USR_PROFILEPIC" />		
+	</resultMap>
+    
+    <resultMap id="friendMap" class="egovframework.kku.usr.service.EgovKkuAppFriendVO">
+		<result property="friendIdx" column="FRIEND_IDX" />
+		<result property="friendMyid" column="FRIEND_MYID" />		
+		<result property="friendFid" column="FRIEND_FID" />		
+		<result property="friendIsfav" column="FRIEND_ISFAV" />
+		<result property="friendStatus" column="FRIEND_STATUS" />		
+		<result property="friendMyIdx" column="FRIEND_MY_IDX" />	
+		<result property="friendFrdIdx" column="FRIEND_FRD_IDX" />		
+	</resultMap>    
+
+    <select id="mypageDAO.selectUserByIdx" resultClass="egovMap">
+		SELECT 
+			ku.*,
+			(SELECT COUNT(*) FROM KU_TRADE WHERE TRD_USR_IDX = ku.USR_IDX AND NOT TRD_STATUS = '0') AS TRADE_CNT
+		FROM 
+			KU_USER AS ku
+		WHERE
+			USR_IDX = #usrIdx#
+	</select>
+
+	<update id="mypageDAO.updateProfile">
+		UPDATE 
+			KU_USER
+	    SET
+			USR_PROFILEPIC = #usrProfilepic#,
+			USR_SRVPROFILEPIC = #usrSrvprofilepic#
+		WHERE
+			USR_IDX = #usrIdx#
+	</update>
+
+
+	<update id="mypageDAO.updatePassword">
+		UPDATE 
+			KU_USER
+		SET
+			USR_PASSWORD = #usrPassword#
+		WHERE
+			USR_IDX = #usrIdx#
+	</update>
+
+   	<update id="mypageDAO.updateNick">
+		UPDATE 
+			KU_USER 
+		SET 
+			USR_NICKNAME = #usrNickname#,
+			NICK_CHANGEDATE = NOW()
+		WHERE 
+			USR_IDX = #usrIdx#
+		<!-- 60일 이내 변경 불가능 -->
+		AND NOT
+			<![CDATA[(DATE(NICK_CHANGEDATE) >= DATE(DATE_SUB(now(), INTERVAL 60 DAY)) 
+			AND DATE(NICK_CHANGEDATE) <= DATE(now())AND USR_IDX = #usrIdx#)]]>
+	</update>
+	
+	<update id="mypageDAO.withdrawal">
+		UPDATE 
+			KU_USER 
+		SET 
+			USR_DELETEYN = 'Y',
+			USR_DELETEDATE = NOW()
+		WHERE 
+			USR_PASSWORD = #usrPassword#
+		AND
+			USR_IDX = #usrIdx#
+	</update>
+	
+	<update id="mypageDAO.withdrawBoard">
+		UPDATE 
+			KU_BOARD
+		SET 
+			BOARD_STATUS = 0
+		WHERE
+			BOARD_WRITER = #usrEmail#
+	</update>
+	
+	<delete id="mypageDAO.withdrawFriends">
+		DELETE FROM
+			KU_FRIEND
+		WHERE
+			FRIEND_MYID = #usrEmail#
+		OR
+			FRIEND_FID = #usrEmail#
+	</delete>
+	
+	<update id="mypageDAO.withdrawTimetable">
+		DELETE FROM
+			KU_TIMETABLE
+		WHERE
+			TIMETBL_USRIDX = #usrIdx#
+	</update>
+	
+	<update id="mypageDAO.withdrawTaxi">
+		UPDATE 
+			KU_TAXI
+		SET 
+			TAXI_STATE = 2
+		WHERE
+			TAXI_WRITERIDX = #usrIdx#
+	</update>
+	
+	<update id="mypageDAO.withdrawReport">
+		UPDATE 
+			KU_FACILITYREPORT
+		SET 
+			REPORT_DELETEYN = 0
+		WHERE
+			REPORTER_ID = #usrEmail#
+	</update>
+	
+	<update id="mypageDAO.withdrawTrade">
+		UPDATE 
+			KU_TRADE
+		SET 
+			TRD_STATUS = 0
+		WHERE
+			TRD_USR_IDX = #usrIdx#
+	</update>
+	
+	<update id="mypageDAO.withdrawLost">
+		UPDATE 
+			KU_LOST
+		SET 
+			LOST_STATUS = 0
+		WHERE
+			LOST_WRITER = #usrIdx#
+	</update>
+	
+	<select id="mypageDAO.selectFriendList" resultClass="egovMap">
+	    SELECT 
+	    	U.USR_IDX, U.USR_EMAIL, U.USR_SRVPROFILEPIC, U.USR_NICKNAME, U.USR_NAME, SUBSTRING(U.USR_STDNUM, 3, 2) AS HACKBUN, 
+	    	U.USR_MAJOR, U.USR_RANK, F.*
+		FROM 		
+			KU_USER AS U INNER JOIN KU_FRIEND AS F
+		ON 	
+			FRIEND_MY_IDX = #friendMyIdx# 
+		AND 
+			U.USR_EMAIL  = F.FRIEND_FID
+	    <isNotEmpty prepend="AND" property="searchKeyword">
+				F.FRIEND_FID IN((SELECT USR_EMAIL FROM KU_USER 
+									WHERE 
+										USR_NICKNAME  LIKE  CONCAT('%', #searchKeyword#, '%')
+									))
+		</isNotEmpty>
+		ORDER BY
+			F.FRIEND_ISFAV DESC, U.USR_NICKNAME
+			
+	</select>
+	
+	<select id="mypageDAO.selectFriendCnt" resultClass="egovMap">
+		SELECT
+			(SELECT COUNT(*) FROM KU_FRIEND WHERE FRIEND_MYID = #usrEmail# AND FRIEND_STATUS = '1') AS FRD_CNT,
+			(SELECT COUNT(*) FROM KU_FRIEND WHERE FRIEND_MYID = #usrEmail# AND FRIEND_STATUS = '0') AS WAIT_CNT
+	</select>
+	
+	<update id="mypageDAO.updateFav">
+		UPDATE 
+			KU_FRIEND
+		SET 
+			FRIEND_ISFAV = #friendIsfav#
+		WHERE 
+			FRIEND_MY_IDX = #friendMyIdx#
+		AND
+			FRIEND_FRD_IDX = #friendFrdIdx#
+	</update>
+	
+	<delete id="mypageDAO.deleteFrd">
+	
+		DELETE FROM 
+			KU_FRIEND 
+		WHERE FRIEND_IDX IN 
+			(SELECT FRIEND_IDX FROM KU_FRIEND WHERE (FRIEND_MY_IDX, FRIEND_FRD_IDX) IN ((#friendMyIdx#,#friendFrdIdx#), (#friendFrdIdx#, #friendMyIdx#)))
+			
+	</delete>	
+	
+	<select id="mypageDAO.selectFrdByNameAndPhone" resultClass="egovMap">
+	    SELECT 
+	    	USR_EMAIL, USR_IDX
+	    FROM 
+	    	KU_USER
+	    WHERE
+	    	USR_NAME = #usrName#
+    	AND
+    		PHONE_NUMBER = #phoneNumber#
+	    AND
+	    	USR_DELETEYN = 'N'
+	</select>	
+	
+	<insert id="mypageDAO.insertFriend">
+		INSERT INTO KU_FRIEND
+           (
+                FRIEND_MYID
+              , FRIEND_FID
+              , FRIEND_MY_IDX
+              , FRIEND_FRD_IDX
+              , FRIEND_STATUS
+           )
+          SELECT 
+          	#friendMyid#, #friendFid#, #friendMyIdx#, #friendFrdIdx#, '0'
+          FROM DUAL <!-- 중복 아닐때만 동작 하도록 -->
+          WHERE NOT EXISTS (
+                       SELECT FRIEND_MY_IDX
+                       FROM KU_FRIEND
+                       WHERE FRIEND_MY_IDX = #friendMyIdx# AND FRIEND_FRD_IDX = #friendFrdIdx#)
+	</insert>	
+
+	<select id="mypageDAO.waitFriendList" resultClass="egovMap">
+	    SELECT 
+	    	U.USR_IDX, U.USR_EMAIL, U.USR_SRVPROFILEPIC, U.USR_NICKNAME, U.USR_NAME, SUBSTRING(U.USR_STDNUM, 3, 2) AS HACKBUN, 
+	    	U.USR_MAJOR, F.*
+		FROM 		
+			KU_FRIEND AS F INNER JOIN KU_USER AS U
+		ON 	
+			F.FRIEND_FRD_IDX = #friendMyIdx#
+		AND 
+			F.FRIEND_MYID = U.USR_EMAIL
+		AND
+			F.FRIEND_STATUS = '0'
+			
+	</select>
+	
+	<insert id="mypageDAO.acceptFrd">
+			
+		INSERT INTO KU_FRIEND 
+			(FRIEND_MYID, FRIEND_FID, FRIEND_MY_IDX, FRIEND_FRD_IDX, FRIEND_STATUS)
+		VALUES
+			(#friendMyid#, #friendFid#, #friendMyIdx#, #friendFrdIdx#,'1'),
+			(#friendFid#, #friendMyid#, #friendFrdIdx#, #friendMyIdx#, '1')
+		ON DUPLICATE KEY UPDATE FRIEND_STATUS = '1' <!-- 중복일때는 업데이트만 하도록 -->
+			
+	</insert>
+	
+	<select  id="mypageDAO.selectmyCommunityCnt" resultClass="java.lang.Integer">
+	    SELECT (<!-- (SELECT count(*) from  KU_TBOARD kt 
+				where kt.TBOARD_WRITER = #usrEmail#)
+				+ -->
+				(SELECT count(*) from  KU_BOARD kb
+				where kb.BOARD_WRITER = #usrEmail# and kb.BOARD_STATUS =1)) as total
+	    
+	</select>
+	
+	<select id="mypageDAO.selectmyCommunityList" resultClass="egovMap">
+	     SELECT 
+	    	kb.BOARD_IDX , kb.BOARD_WRITER,  kb.BOARD_TITLE, kb.BOARD_CONTENT  ,kb.BOARD_WRITEDATE , kb.BOARD_VIEWNUM  ,kb.BOARD_NAME, kb.BOARD_DETAILNAME,
+			(select COUNT(*) from KU_BOARDLIKE kl where kb.BOARD_IDX = kl.BOARD_IDX AND kl.BOARD_CODE = 1 ) as LIKE_NUM,
+			(SELECT ku.USR_NICKNAME  from KU_USER ku WHERE ku.USR_EMAIL = kb.BOARD_WRITER) as USR_NICKNAME ,
+			(SELECT COUNT(*) from KU_REPLY kr where kr.BOARD_IDX = kb.BOARD_IDX) as REPLY_NUM,
+			(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_CODE = 1 AND FILE_TBL_IDX = kb.BOARD_IDX AND FILE_DEL_YN = "N") AS FILE_CNT,
+			(SELECT FILE_SRV_FILE FROM KU_FILE  WHERE FILE_TBL_CODE = 1 AND FILE_TBL_IDX = kb.BOARD_IDX AND FILE_DEL_YN = "N" ORDER BY FILE_IDX ASC LIMIT 1) AS FIRST
+		from 
+			KU_BOARD as kb
+		where 
+			kb.BOARD_WRITER = #usrEmail# and kb.BOARD_STATUS =1
+		ORDER BY kb.BOARD_IDX DESC
+		<!-- Union
+		select 
+			kt.TBOARD_IDX ,kt.TBOARD_WRITER ,kt.TBOARD_TITLE,  kt.TBOARD_CONTENT ,kt.TBOARD_WRITEDATE, kt.TBOARD_VIEWNUM , kt.TBOARD_NAME,  kt.TBOARD_DETAILNAME,
+			(select COUNT(*) from KU_BOARDLIKE tl where tl.BOARD_IDX= kt.TBOARD_IDX AND tl.BOARD_CODE = 2) as LIKE_NUM,
+			(SELECT COUNT(*) from KU_TBOARDREPLY tr where tr.BOARD_IDX = kt.TBOARD_IDX) as REPLY_NUM,
+			(SELECT ku.USR_NICKNAME  from KU_USER ku WHERE ku.USR_EMAIL = kt.TBOARD_WRITER) as USR_NICKNAME ,
+			(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_CODE = 2 AND FILE_TBL_IDX = kt.TBOARD_IDX AND FILE_DEL_YN = "N") AS FILE_CNT,
+			(SELECT FILE_SRV_FILE FROM KU_FILE WHERE  FILE_TBL_CODE = 2 AND FILE_TBL_IDX = kt.TBOARD_IDX  AND FILE_DEL_YN = "N" ORDER BY FILE_IDX ASC LIMIT 1) AS FIRST
+		from 
+			KU_TBOARD as kt
+		where kt.TBOARD_WRITER =  #usrEmail# and kt.TBOARD_STATUS =1 -->
+			
+	</select>
+	
+	
+	<select  id="mypageDAO.checkFriend" resultClass="java.lang.String">
+		SELECT FRIEND_STATUS FROM KU_FRIEND WHERE FRIEND_MY_IDX = #friendMyIdx# AND FRIEND_FRD_IDX = #friendFrdIdx#
+	</select>
+	
+	<select  id="mypageDAO.selectFriendStatus" resultClass="egovMap">
+		SELECT U.USR_IDX, U.USR_EMAIL, U.USR_SRVPROFILEPIC, U.USR_NICKNAME, U.USR_NAME, F.FRIEND_ISFAV,
+			U.USR_MAJOR, U.USR_RANK,
+			CASE WHEN (SELECT COUNT(1) FROM KU_TIMETABLE
+				WHERE TIMETBL_USRIDX = F.FRIEND_FRD_IDX
+				AND TIMETBL_DAY = (CASE DAYOFWEEK(NOW()) WHEN '1' THEN '일' WHEN '2' THEN '월' WHEN '3' THEN '화' WHEN '4' THEN '수' WHEN '5' THEN '목' WHEN '6' THEN '금' WHEN '7' THEN '토' END) AND DATE_FORMAT(NOW(), '%H%i') BETWEEN TIMETBL_STARTTIME AND TIMETBL_ENDTIME) > 0 THEN 'A'
+				WHEN (SELECT COUNT(1) FROM KU_TIMETABLE
+				WHERE TIMETBL_USRIDX = F.FRIEND_FRD_IDX
+				AND TIMETBL_DAY = (CASE DAYOFWEEK(NOW()) WHEN '1' THEN '일' WHEN '2' THEN '월' WHEN '3' THEN '화' WHEN '4' THEN '수' WHEN '5' THEN '목' WHEN '6' THEN '금' WHEN '7' THEN '토' END) AND DATE_FORMAT(NOW(), '%H%i') NOT BETWEEN TIMETBL_STARTTIME AND TIMETBL_ENDTIME) > 0 THEN 'B'
+				ELSE 'N'
+				     END AS NOWSTATUS
+		FROM KU_FRIEND F
+		INNER JOIN KU_USER U ON U.USR_IDX = F.FRIEND_FRD_IDX
+		WHERE F.FRIEND_MY_IDX = #friendMyIdx#
+		AND F.FRIEND_STATUS != 0
+		ORDER BY
+			F.FRIEND_ISFAV DESC, U.USR_NICKNAME
+	</select>
+	<select id="mypageDAO.selectMyReportListbyUsrIdx" resultClass="egovMap">
+	    SELECT 
+	    	*
+	    FROM 
+	    	KU_REPORT_LIST
+	    WHERE
+	    	WRITER_IDX = #usrIdx#
+	</select>
+		
+
+	
+	
+	
+	
+	
+	
+</sqlMap>

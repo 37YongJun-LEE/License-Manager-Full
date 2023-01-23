@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="themeBoardDAO">
+	<typeAlias alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  	<typeAlias alias="themeBoardVO" type="egovframework.kku.usr.service.EgovKkuAppCommunityThemeBoardVO"/>
+	
+	 <resultMap id="themeBoardMap" class="egovframework.kku.usr.service.EgovKkuAppCommunityThemeBoardVO">
+		<result property="likeNum" column="LIKE_NUM"/>
+  	    <result property="usrNickname" column="USR_NICKNAME"/>
+  	    <result property="usrMajor" column="USR_MAJOR"/>
+  	    <result property="usrStdnum" column="USR_STDNUM"/>
+  	    <result property="fileCnt" column="FILE_CNT"/>
+		<result property="first" column="FIRST"/>
+		<result property="usrSrvprofilepic" column="USR_SRVPROFILEPIC"/>
+		<result property="tboardIdx" column="TBOARD_IDX"/>
+    	<result property="tboardWriter" column="TBOARD_WRITER"/>
+    	<result property="tboardTitle" column="TBOARD_TITLE" />
+     <result property="tboardContent" column="TBOARD_CONTENT" />
+        <result property="tboardWritedate" column="TBOARD_WRITEDATE" />  
+    	<result property="tboardViewnum" column="TBOARD_VIEWNUM" />
+		<result property="tboardStatus" column="TBOARD_STATUS" />
+    	<result property="tboardName" column="TBOARD_NAME" />
+    	<result property="tboardDetailname" column="TBOARD_DETAILNAME" />
+	</resultMap> 
+
+	<select id="themeBoardDAO.selectThemeBoardList" resultClass="egovMap">
+		SELECT 
+			*
+		FROM
+			KU_BOARDTHEME
+		ORDER BY BTHEME_IDX
+	</select>
+	<select id= "themeBoardDAO.selectHBoardList" resultClass="egovMap">
+	     SELECT 
+	    	kb.BOARD_IDX , kb.BOARD_WRITER,  kb.BOARD_TITLE, kb.BOARD_CONTENT  ,kb.BOARD_WRITEDATE , kb.BOARD_VIEWNUM  ,kb.BOARD_NAME, kb.BOARD_DETAILNAME,
+			(select COUNT(*) from KU_BOARDLIKE kl where kb.BOARD_IDX = kl.BOARD_IDX AND kl.BOARD_CODE = 1) as LIKE_NUM,
+			(SELECT ku.USR_NICKNAME  from KU_USER ku WHERE ku.USR_EMAIL = kb.BOARD_WRITER) as USR_NICKNAME ,
+			(SELECT COUNT(*) from KU_REPLY kr where kr.BOARD_IDX = kb.BOARD_IDX) as REPLY_NUM,
+			(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_CODE = 1 AND FILE_TBL_IDX = kb.BOARD_IDX AND FILE_DEL_YN = "N") AS FILE_CNT,
+			(SELECT FILE_SRV_FILE FROM KU_FILE  WHERE FILE_TBL_CODE = 1 AND FILE_TBL_IDX = kb.BOARD_IDX AND FILE_DEL_YN = "N" ORDER BY FILE_IDX ASC LIMIT 1) AS FIRST
+		from 
+			KU_BOARD as kb
+		where kb.BOARD_STATUS = 1
+		HAVING 
+			(select COUNT(*) from KU_BOARDLIKE kl where kb.BOARD_IDX = kl.BOARD_IDX) >15
+		<!-- Union
+		select 
+			kt.TBOARD_IDX ,kt.TBOARD_WRITER ,kt.TBOARD_TITLE,  kt.TBOARD_CONTENT ,kt.TBOARD_WRITEDATE, kt.TBOARD_VIEWNUM , kt.TBOARD_NAME,  kt.TBOARD_DETAILNAME,
+			(select COUNT(*) from KU_BOARDLIKE tl where tl.BOARD_IDX= kt.TBOARD_IDX AND tl.BOARD_CODE = 2) as LIKE_NUM,
+			(SELECT COUNT(*) from KU_TBOARDREPLY tr where tr.BOARD_IDX = kt.TBOARD_IDX) as REPLY_NUM,
+			(SELECT ku.USR_NICKNAME  from KU_USER ku WHERE ku.USR_EMAIL = kt.TBOARD_WRITER) as USR_NICKNAME ,
+			(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_CODE = 2 AND FILE_TBL_IDX = kt.TBOARD_IDX AND FILE_DEL_YN = "N") AS FILE_CNT,
+			(SELECT FILE_SRV_FILE FROM KU_FILE WHERE  FILE_TBL_CODE = 2 AND FILE_TBL_IDX = kt.TBOARD_IDX  AND FILE_DEL_YN = "N" ORDER BY FILE_IDX ASC LIMIT 1) AS FIRST
+		from 
+			KU_TBOARD as kt
+		HAVING 
+			(select COUNT(*)  from KU_BOARDLIKE tl where tl.BOARD_IDX= kt.TBOARD_IDX AND tl.BOARD_CODE = 2) >15
+		order by 
+			LIKE_NUM desc -->
+	</select>
+
+	<insert id="themeBoardDAO.insertTboard">
+	    INSERT INTO
+	    	KU_TBOARD
+	    		(TBOARD_CONTENT,TBOARD_WRITER,TBOARD_WRITEDATE,TBOARD_VIEWNUM,TBOARD_STATUS,TBOARD_DETAILNAME,TBOARD_NAME)
+	    VALUES 
+	    	(#tboardContent#,#tboardWriter#,sysdate(),#tboardViewnum#,#tboardStatus#,#tboardDetailname#,'Tboard')
+	    <selectKey keyProperty="tboardIdx" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY
+		</selectKey>	
+	</insert>
+	
+	<select id="themeBoardDAO.selectTBoardList" resultClass="egovMap">
+		SELECT 
+			kt.*,
+			(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_CODE = 2 AND FILE_TBL_IDX = kt.TBOARD_IDX AND FILE_DEL_YN = "N") AS FILE_CNT,
+			(SELECT FILE_SRV_FILE FROM KU_FILE as f WHERE f.FILE_TBL_CODE = 2 AND f.FILE_TBL_IDX = kt.TBOARD_IDX AND f.FILE_DEL_YN = "N" ORDER BY f.FILE_IDX ASC LIMIT 1) AS FIRST,
+			(select u.USR_NICKNAME from KU_USER as u where u.USR_EMAIL = kt.TBOARD_WRITER  ) as USR_NICKNAME ,
+			(select COUNT(*) from KU_TBOARDREPLY as r where r.BOARD_IDX = kt.TBOARD_IDX) as REPLY_NUM,
+			(select COUNT(*) from KU_BOARDLIKE as kb2 where kb2.BOARD_IDX = kt.TBOARD_IDX AND kb2.BOARD_CODE = 2) AS LIKE_NUM
+		FROM 
+			KU_TBOARD kt 
+		WHERE
+			TBOARD_DETAILNAME = #tboardDetailname#
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="tboardContent">
+				kt.TBOARD_CONTENT LIKE CONCAT('%', #searchKeyword#, '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="usrNickname">
+				kt.TBOARD_WRITER IN(SELECT USR_EMAIL FROM KU_USER WHERE USR_NICKNAME LIKE CONCAT('%', #searchKeyword#, '%'))
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="All">
+				kt.TBOARD_IDX IN((SELECT 
+									TBOARD_IDX
+								FROM 
+									KU_TBOARD
+								WHERE 									
+									kt.TBOARD_CONTENT LIKE CONCAT('%', #searchKeyword# , '%')
+								OR 
+									kt.TBOARD_WRITER IN(SELECT USR_EMAIL FROM KU_USER WHERE USR_NICKNAME LIKE CONCAT('%', #searchKeyword#, '%'))))
+			</isEqual>
+		</isNotEmpty>
+		ORDER BY kt.TBOARD_IDX DESC
+		LIMIT 
+			#firstIndex#,#recordCountPerPage#
+	</select>
+	<select id= "themeBoardDAO.selectBoardListCnt" resultClass="java.lang.Integer">
+	    SELECT
+	    	COUNT(*)
+	    FROM 
+	    	KU_TBOARD
+	    WHERE
+			TBOARD_DETAILNAME = #tboardDetailname#
+	    
+	</select>
+	<select id="themeBoardDAO.selectTBoardDetail" parameterClass="themeBoardVO" resultMap="themeBoardMap">
+	   SELECT 
+	  	kt.TBOARD_IDX ,kt.TBOARD_CONTENT ,kt.TBOARD_WRITER ,kt.TBOARD_VIEWNUM ,kt.TBOARD_STATUS , kt.TBOARD_DETAILNAME ,kt.TBOARD_TITLE,kt.TBOARD_NAME , DATE_FORMAT(kt.TBOARD_WRITEDATE ,'%Y.%m.%d-%H:%i') AS TBOARD_WRITEDATE,
+		ku.USR_NICKNAME , SUBSTRING(ku.USR_STDNUM, 3, 2) as USR_STDNUM ,ku.USR_MAJOR,ku.USR_SRVPROFILEPIC  , 
+		(SELECT COUNT(*) FROM KU_BOARDLIKE AS li WHERE li.BOARD_IDX = kt.TBOARD_IDX AND BOARD_CODE = 2) AS LIKE_NUM,
+		(SELECT FILE_SRV_FILE FROM KU_FILE as f WHERE f.FILE_TBL_CODE = 2 AND f.FILE_TBL_IDX = kt.TBOARD_IDX AND f.FILE_DEL_YN = "N" ORDER BY f.FILE_IDX ASC LIMIT 1) AS FIRST,
+		(SELECT COUNT(*) FROM KU_FILE AS f WHERE f.FILE_TBL_CODE = 2 AND f.FILE_TBL_IDX = kt.TBOARD_IDX AND f.FILE_DEL_YN = "N") as FILE_CNT
+		FROM
+		KU_TBOARD as kt inner join KU_USER as ku on kt.TBOARD_WRITER = ku.USR_EMAIL  
+		where 
+			kt.TBOARD_IDX = #tboardIdx#  
+	    
+	</select>
+	<select id="themeBoardDAO.boardFileList" resultClass="egovMap">
+	    SELECT 
+			*
+		FROM
+			KU_FILE
+		WHERE
+			FILE_TBL_IDX = #tboardIdx#
+		AND
+			FILE_TBL_CODE = #fileTblCode#
+		AND
+			FILE_DEL_YN = 'N'
+	</select>
+	<update id="themeBoardDAO.updateBoard">
+	    UPDATE
+	    	KU_TBOARD
+	    SET
+	    	TBOARD_CONTENT = #tboardContent#
+	    WHERE
+	    	TBOARD_IDX = #tboardIdx#
+	</update>
+	<select id="themeBoardDAO.selectTReplyList" resultClass="egovMap">
+	    SELECT 
+	   		*,(SELECT count(*) from KU_REPLYLIKE kr where kr.REPLY_IDX = kt.REPLY_IDX and BOARD_CODE = 2) as LIKE_NUM
+	   FROM 
+	   		KU_TBOARDREPLY kt inner join KU_USER ku 
+	   	on kt.REPLY_WRITER  = ku.USR_EMAIL 
+	   WHERE BOARD_IDX =  #tboardIdx#
+	    
+	</select>
+	<insert id="themeBoardDAO.insertTboardReply">
+	    INSERT INTO KU_TBOARDREPLY
+	    (BOARD_IDX, BOARD_DETAILNAME,REPLY_WRITER, REPLY_CONTENT,REPLY_WRITEDATE)
+	    VALUES (#boardIdx#,#boardDetailname#,#replyWriter#,#replyContent#,sysdate())
+	</insert>
+	
+	<select id="themeBoardDAO.selectTopThemeBoardList" resultClass="egovMap">
+	    		SELECT 
+	   		kt.TBOARD_IDX ,kt.TBOARD_WRITER ,kt.TBOARD_TITLE,  kt.TBOARD_CONTENT ,kt.TBOARD_WRITEDATE, kt.TBOARD_VIEWNUM , kt.TBOARD_NAME,  kt.TBOARD_DETAILNAME,
+			(select COUNT(*) from KU_BOARDLIKE tl where tl.BOARD_IDX= kt.TBOARD_IDX AND tl.BOARD_CODE = 2) as LIKE_NUM,
+			(SELECT COUNT(*) from KU_TBOARDREPLY tr where tr.BOARD_IDX = kt.TBOARD_IDX) as REPLY_NUM,
+			(SELECT ku.USR_NICKNAME  from KU_USER ku WHERE ku.USR_EMAIL = kt.TBOARD_WRITER) as USR_NICKNAME ,
+			(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_CODE = 2 AND FILE_TBL_IDX = kt.TBOARD_IDX AND FILE_DEL_YN = "N") AS FILE_CNT,
+			(SELECT FILE_SRV_FILE FROM KU_FILE WHERE  FILE_TBL_CODE = 2 AND FILE_TBL_IDX = kt.TBOARD_IDX  AND FILE_DEL_YN = "N" ORDER BY FILE_IDX ASC LIMIT 1) AS FIRST
+		from 
+			KU_TBOARD kt 
+		where 
+			kt.TBOARD_DETAILNAME = #bthemeName# 
+		and
+			(SELECT COUNT(*) from KU_BOARDLIKE kb where kb.BOARD_IDX=kt.TBOARD_IDX and kb.BOARD_CODE=2) > 10
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="tboardContent">
+				kt.TBOARD_CONTENT LIKE CONCAT('%', #searchKeyword#, '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="usrNickname">
+				kt.TBOARD_WRITER IN(SELECT USR_EMAIL FROM KU_USER WHERE USR_NICKNAME LIKE CONCAT('%', #searchKeyword#, '%'))
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="All">
+				kt.TBOARD_IDX IN((SELECT 
+									TBOARD_IDX
+								FROM 
+									KU_TBOARD
+								WHERE 									
+									kt.TBOARD_CONTENT LIKE CONCAT('%', #searchKeyword# , '%')
+								OR 
+									kt.TBOARD_WRITER IN(SELECT USR_EMAIL FROM KU_USER WHERE USR_NICKNAME LIKE CONCAT('%', #searchKeyword#, '%'))))
+			</isEqual>
+		</isNotEmpty>
+		order by 
+			(SELECT COUNT(*) from KU_BOARDLIKE kb where kb.BOARD_IDX=kt.TBOARD_IDX and kb.BOARD_CODE=2) desc
+		LIMIT 
+			#firstIndex#,#recordCountPerPage# 
+		
+			    
+	</select>
+	<select id="themeBoardDAO.selectBoardTopListCnt" resultClass="java.lang.Integer">
+	  <![CDATA[  SELECT 
+	   		COUNT(*) 
+		from 
+			KU_TBOARD kt 
+		where 
+			kt.TBOARD_DETAILNAME = #bthemeName# 
+		and 
+			(SELECT 
+				COUNT(*) 
+			from 
+				KU_BOARDLIKE kb 
+			where 
+				kb.BOARD_IDX= kt.TBOARD_IDX  
+			and
+				 kb.BOARD_CODE=2) > 10 
+				 ]]>
+				 <isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="tboardContent">
+				kt.TBOARD_CONTENT LIKE CONCAT('%', #searchKeyword#, '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="usrNickname">
+				kt.TBOARD_WRITER IN(SELECT USR_EMAIL FROM KU_USER WHERE USR_NICKNAME LIKE CONCAT('%', #searchKeyword#, '%'))
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="All">
+				kt.TBOARD_IDX IN((SELECT 
+									TBOARD_IDX
+								FROM 
+									KU_TBOARD
+								WHERE 									
+									kt.TBOARD_CONTENT LIKE CONCAT('%', #searchKeyword# , '%')
+								OR 
+									kt.TBOARD_WRITER IN(SELECT USR_EMAIL FROM KU_USER WHERE USR_NICKNAME LIKE CONCAT('%', #searchKeyword#, '%'))))
+			</isEqual>
+		</isNotEmpty>
+	</select>
+</sqlMap>

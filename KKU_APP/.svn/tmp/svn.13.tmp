@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="kkuCAMPUS">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<typeAlias  alias="EgovKkuAdminCampusInfoVO" type="egovframework.kku.adm.service.EgovKkuAdmCampusInfoVO"/>
+	<typeAlias  alias="EgovKkuAdminStudentInfoVO" type="egovframework.kku.adm.service.EgovKkuAdmStudentInfoVO"/>
+
+		<resultMap id="EgovKkuAdminCampusInfoVO" class = "egovframework.kku.adm.service.EgovKkuAdmCampusInfoVO">
+		<result property="noticeIdx" column = "NOTICE_IDX"/>
+		<result property="noticeNum" column = "NOTICE_NUM"/>
+		<result property="noticeTitle" column = "NOTICE_TITLE"/>
+		<result property="noticeContent" column = "NOTICE_CONTENT"/>
+		<result property="noticeCategory" column = "NOTICE_CATEGORY"/>
+		<result property="noticeName" column = "NOTICE_NAME"/>
+		<result property="noticeDate" column = "NOTICE_DATE"/>
+		<result property="noticeFiles" column = "NOTICE_FILES"/>
+		<result property="noticeUpdated" column = "NOTICE_UPDATED"/>
+		<result property="kc" column = "kc"/>
+		<result property="kf" column = "kf"/>
+		</resultMap>
+		
+		<resultMap id="EgovKkuAdminStudentInfoVO" class = "egovframework.kku.adm.service.EgovKkuAdmStudentInfoVO">
+		<result property="mnoticeIdx" column = "MNOTICE_IDX"/>
+		<result property="mnoticeNum" column = "MNOTICE_NUM"/>
+		<result property="mnoticeTitle" column = "MNOTICE_TITLE"/>
+		<result property="mnoticeContent" column = "MNOTICE_CONTENT"/>
+		<result property="mnoticeCategory" column = "MNOTICE_CATEGORY"/>
+		<result property="mnoticeName" column = "MNOTICE_NAME"/>
+		<result property="mnoticeDate" column = "MNOTICE_DATE"/>
+		<result property="mnoticeFiles" column = "MNOTICE_FILES"/>
+		<result property="mnoticeUpdated" column = "MNOTICE_UPDATED"/>
+		<result property="kc" column = "kc"/>
+		<result property="kf" column = "kf"/>
+		</resultMap>
+
+
+  <select id="adminCampusDAO.getReportList" resultClass="egovMap">
+      select 
+      	*
+      from KU_FACILITYREPORT
+      where
+      1=1
+      <isNotEmpty prepend="AND" property="searchSdate">
+			DATE_FORMAT(REPORT_DATE,  '%Y-%m-%d') <![CDATA[>=]]> #searchSdate# 
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="searchEdate">
+			DATE_FORMAT(REPORT_DATE,  '%Y-%m-%d') <![CDATA[<=]]> #searchEdate#
+		</isNotEmpty>
+      <isNotEmpty prepend="AND" property="searchKeyword">
+		    <isEqual property="searchCondition" compareValue="all">
+		       REPORTER_PNUM LIKE CONCAT('%',#searchKeyword#,'%') 
+		       ||
+		       REPORTER_ID LIKE CONCAT('%',#searchKeyword#,'%')
+		       ||
+		       REPORT_CONTENT LIKE CONCAT('%',#searchKeyword#,'%')
+		    </isEqual>
+		     <isEqual property="searchCondition" compareValue="pnum">
+		       REPORTER_PNUM LIKE CONCAT('%',#searchKeyword#,'%')
+		    </isEqual>
+		     <isEqual property="searchCondition" compareValue="id">
+		       REPORTER_ID LIKE CONCAT('%',#searchKeyword#,'%')
+		    </isEqual>
+		     <isEqual property="searchCondition" compareValue="content">
+		       REPORT_CONTENT LIKE CONCAT('%',#searchKeyword#,'%')
+		    </isEqual>
+		</isNotEmpty>
+		ORDER BY
+			REPORT_DATE DESC		
+		limit #firstIndex#, #pageUnit#
+  </select>
+  
+  <select id="adminCampusDAO.getReportListCnt" resultClass="java.lang.Integer">
+      select 
+      	count(*)
+      from KU_FACILITYREPORT
+      where
+      1=1
+      <isNotEmpty prepend="AND" property="searchSdate">
+			DATE_FORMAT(REPORT_DATE,  '%Y-%m-%d') <![CDATA[>=]]> #searchSdate# 
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="searchEdate">
+			DATE_FORMAT(REPORT_DATE,  '%Y-%m-%d') <![CDATA[<=]]> #searchEdate#
+		</isNotEmpty>
+      <isNotEmpty prepend="AND" property="searchKeyword">
+		    <isEqual property="searchCondition" compareValue="all">
+		       REPORTER_PNUM LIKE CONCAT('%',#searchKeyword#,'%') 
+		       ||
+		       REPORTER_ID LIKE CONCAT('%',#searchKeyword#,'%')
+		       ||
+		       REPORT_CONTENT LIKE CONCAT('%',#searchKeyword#,'%')
+		    </isEqual>
+		     <isEqual property="searchCondition" compareValue="pnum">
+		       REPORTER_PNUM LIKE CONCAT('%',#searchKeyword#,'%')
+		    </isEqual>
+		     <isEqual property="searchCondition" compareValue="id">
+		       REPORTER_ID LIKE CONCAT('%',#searchKeyword#,'%')
+		    </isEqual>
+		     <isEqual property="searchCondition" compareValue="content">
+		       REPORT_CONTENT LIKE CONCAT('%',#searchKeyword#,'%')
+		    </isEqual>
+		</isNotEmpty>
+      
+  </select>
+  
+  
+  
+  
+  
+  <select id="adminCampusDAO.selectCampusList" resultClass="egovMap">
+  	<![CDATA[
+	  	select
+	  		NOTICE_IDX, NOTICE_NUM, NOTICE_TITLE, NOTICE_CATEGORY, NOTICE_NAME, NOTICE_DATE, NOTICE_UPDATED
+	  	from 
+	  		KU_SCHOOLNOTICE
+	  	WHERE
+	  		NOTICE_IDX >= 0 
+  	]]>
+  		
+  	<isNotEmpty prepend="AND" property="searchSdate">
+			<![CDATA[ NOTICE_DATE >= #searchSdate# ]]>
+		</isNotEmpty>	
+		<isNotEmpty prepend="AND" property="searchEdate">
+			<![CDATA[ NOTICE_DATE <= #searchEdate# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="title">
+				NOTICE_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="category">
+				NOTICE_CATEGORY LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="content">
+				NOTICE_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="name">
+				NOTICE_NAME LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>			
+			<isEqual prepend="AND" property="searchCondition" compareValue="ALL">
+				(NOTICE_IDX LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				NOTICE_CATEGORY LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				NOTICE_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				NOTICE_NAME LIKE  CONCAT('%', #searchKeyword# , '%'))
+			</isEqual>
+		</isNotEmpty>
+		order by
+  			NOTICE_DATE
+  		DESC		
+		limit #firstIndex#, #pageUnit#
+	
+  </select>
+  
+  <select id="adminCampusDAO.selectCampusInfoUpdateList" resultClass="egovMap">
+  	SELECT 
+  		NOTICE_CATEGORY, NOTICE_UPDATED 
+  	FROM 
+  		KU_SCHOOLNOTICE
+  	group by 
+  		NOTICE_CATEGORY;
+  
+  </select>
+  
+  <select id="adminCampusDAO.selectStudentList" resultClass="egovMap">
+ 	<![CDATA[
+	 	select
+	  		MNOTICE_IDX, MNOTICE_TITLE, MNOTICE_CATEGORY, MNOTICE_NAME, MNOTICE_DATE, MNOTICE_UPDATED
+	  	from 
+	  		KU_MAJORNOTICE
+	  	WHERE 
+	  		MNOTICE_IDX >= 0 
+	  	]]>
+	<isNotEmpty prepend="AND" property="searchSdate">
+			<![CDATA[ MNOTICE_DATE >= #searchSdate# ]]>
+		</isNotEmpty>	
+		<isNotEmpty prepend="AND" property="searchEdate">
+			<![CDATA[ MNOTICE_DATE <= #searchEdate# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="title">
+				MNOTICE_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="major">
+				MNOTICE_CATEGORY LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="content">
+				MNOTICE_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>			
+			<isEqual prepend="AND" property="searchCondition" compareValue="name">
+				MNOTICE_NAME LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="ALL">
+				(MNOTICE_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				MNOTICE_CATEGORY LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				MNOTICE_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				MNOTICE_NAME LIKE  CONCAT('%', #searchKeyword# , '%'))
+			</isEqual>
+		</isNotEmpty>
+		order by
+	  		MNOTICE_IDX 
+	  	DESC
+		
+		limit #firstIndex#, #pageUnit#
+  </select>
+  
+  <select id="adminCampusDAO.selectStudentInfoUpdateList" resultClass="egovMap">
+  	SELECT
+  		MNOTICE_CATEGORY, MNOTICE_UPDATED 
+  	FROM
+  		KU_MAJORNOTICE 
+  	group by 
+  		MNOTICE_CATEGORY;
+  </select>
+  
+  <select id="adminCampusDAO.selectCampusInfoDetail" resultMap="EgovKkuAdminCampusInfoVO">
+  	select
+  		*, 
+		REPLACE(NOTICE_CONTENT, 'src="/', 'src="https://www.kku.ac.kr/') AS kc,
+		REPLACE(NOTICE_FILES, 'href="/', 'href="https://www.kku.ac.kr/') AS kf
+  	from 
+  		KU_SCHOOLNOTICE
+  	where
+  		NOTICE_IDX = #noticeIdx#
+  </select>
+  
+  <select id="adminCampusDAO.selectCampusInfoListCnt" resultClass="java.lang.Integer">
+  	<![CDATA[select
+  		COUNT(*)
+  	from 
+  		KU_SCHOOLNOTICE
+  	WHERE
+  		NOTICE_IDX >= 0 
+  	]]>
+  	<isNotEmpty prepend="AND" property="searchSdate">
+			<![CDATA[ NOTICE_DATE >= #searchSdate# ]]>
+		</isNotEmpty>	
+		<isNotEmpty prepend="AND" property="searchEdate">
+			<![CDATA[ NOTICE_DATE <= #searchEdate# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="title">
+				NOTICE_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="category">
+				NOTICE_CATEGORY LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="content">
+				NOTICE_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="name">
+				NOTICE_NAME LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>			
+			<isEqual prepend="AND" property="searchCondition" compareValue="ALL">
+				(NOTICE_IDX LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				NOTICE_CATEGORY LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				NOTICE_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				NOTICE_NAME LIKE  CONCAT('%', #searchKeyword# , '%'))
+			</isEqual>
+		</isNotEmpty>
+  </select>
+  <select id="adminCampusDAO.selectStudentInfoListCnt" resultClass="java.lang.Integer">
+  	<![CDATA[
+	  	select
+	  		COUNT(*)
+	  	from 
+	  		KU_MAJORNOTICE
+	  	WHERE
+	  		MNOTICE_IDX >= 0 
+  		]]>
+  	<isNotEmpty prepend="AND" property="searchSdate">
+			<![CDATA[ MNOTICE_DATE >= #searchSdate# ]]>
+		</isNotEmpty>	
+		<isNotEmpty prepend="AND" property="searchEdate">
+			<![CDATA[ MNOTICE_DATE <= #searchEdate# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="title">
+				MNOTICE_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="major">
+				MNOTICE_CATEGORY LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="content">
+				MNOTICE_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>			
+			<isEqual prepend="AND" property="searchCondition" compareValue="name">
+				MNOTICE_NAME LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="ALL">
+				(MNOTICE_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				MNOTICE_CATEGORY LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				MNOTICE_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+				||
+				MNOTICE_NAME LIKE  CONCAT('%', #searchKeyword# , '%'))
+			</isEqual>
+		</isNotEmpty>
+  </select>
+  <update id="adminCampusDAO.updateCampusInfo">
+  
+  	UPDATE
+  		KU_SCHOOLNOTICE
+  	SET
+  		NOTICE_NUM = #noticeNum#,
+  		NOTICE_TITLE = #noticeTitle#,
+  		NOTICE_CONTENT = #noticeContent#,
+  		NOTICE_NAME = #noticeName#,
+  		NOTICE_DATE = #noticeDate#
+  	WHERE
+  		NOTICE_IDX = #noticeIdx#
+  </update>
+  <select id="adminCampusDAO.selectStudentInfoDetail" resultMap="EgovKkuAdminStudentInfoVO">
+  	select
+  		*, 
+		REPLACE(MNOTICE_CONTENT, 'src="/', 'src="https://www.kku.ac.kr/') AS kc,
+		REPLACE(MNOTICE_FILES, 'href="/', 'href="https://www.kku.ac.kr/') AS kf
+  	from 
+  		KU_MAJORNOTICE
+  	where
+  		MNOTICE_IDX = #mnoticeIdx#
+  </select>
+  <update id="adminCampusDAO.updateStudentInfo">
+  
+  	UPDATE
+  		KU_MAJORNOTICE
+  	SET
+  		MNOTICE_NUM = #mnoticeNum#,
+  		MNOTICE_TITLE = #mnoticeTitle#,
+  		MNOTICE_CONTENT = #mnoticeContent#,
+  		MNOTICE_NAME = #mnoticeName#,
+  		MNOTICE_DATE = #mnoticeDate#
+  	WHERE
+  		MNOTICE_IDX = #mnoticeIdx#
+  </update>
+  <select id="adminCampusDAO.selectFacilityReportDetailByIdx" resultClass="egovMap">
+       select
+      	kf.REPORT_IDX as reportIdx
+      	, kf.REPORT_CONTENT as reportContent
+      	, kf.REPORTER_PNUM as reporterPnum
+      	, kf.REPORTER_ID as reporterId
+      	, (select tc.CD_NAME_2 from tw_code tc where tc.CD_VAL_1 = 'fix_process_state' and tc.CD_VAL_2 = kf.PROCESS_STATE) as processState
+		, kf.PROCESS_STATE as processStateNum
+      	, DATE_FORMAT(kf.REPORT_DATE , "%Y.%m.%d") as reportDate
+      	, kf.FIX_COMMENT as fixComment
+      	, kf.READ_YN as readYn
+      	, DATE_FORMAT(kf.MOD_DATE , "%Y.%m.%d") as modDate
+      	, kf.COMMENT_WRITER as commentWriter
+      	, kf.REPORT_DELETEYN as reportDeleteyn
+      	, ku.USR_NAME as usrName
+      	, ku.USR_DEPARTMENT as usrDepartment
+      	, ku.USR_MAJOR as usrMajor
+      	, ku.USR_STDNUM as usrStdnum
+      	, (select count(*) from KU_FACILITYREPORT k where k.REPORTER_ID = kf.REPORTER_ID) as reportCnt
+      FROM
+      	KU_FACILITYREPORT kf inner join KU_USER ku 
+      	on
+      	kf.REPORTER_ID = ku.USR_EMAIL 
+      WHERE
+      	REPORT_IDX = #reportIdx#
+      
+  </select>
+  <update id ="adminCampusDAO.updateFixReportByIdx">
+      update
+  			KU_FACILITYREPORT
+  		set
+  			PROCESS_STATE = #processState#
+  			<isNotEmpty property="commentWriter" prepend=",">
+  			    COMMENT_WRITER = #commentWriter#
+  			</isNotEmpty>
+  			<isNotEmpty property="fixComment" prepend=",">
+  			    FIX_COMMENT = #fixComment#
+  			</isNotEmpty>
+  		where
+  			REPORT_IDX = #reportIdx#
+      
+  </update>
+  		
+</sqlMap>

@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="majorNoticeDAO">
+	<typeAlias alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  	<typeAlias alias="majorNoticeVO" type="egovframework.kku.usr.service.EgovKkuAppCommunitySchoolInfoMajorNoticeVO"/>
+
+	<select id="majorNoticeDAO.getURL" resultClass="String">
+		SELECT
+			UNI_URL
+		FROM
+			KU_UNI
+		WHERE
+			UNI_MAJOR = #usrMajor#
+	</select>
+
+	<select id="majorNoticeDAO.selectMajorList" resultClass="String">
+		SELECT
+			UNI_MAJOR
+		FROM
+			KU_UNI
+	</select>
+
+	<select id="majorNoticeDAO.selectBoardListByMajor" resultClass="egovMap">
+		SELECT 
+			k.*,
+			(SELECT COUNT(*) FROM kku_app.KU_LIKE WHERE BOARD_IDX = k.BOARD_IDX) AS LIKE_CNT,
+			(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_IDX = k.BOARD_IDX AND FILE_DEL_YN = "N") AS FILE_CNT,
+			(SELECT FILE_SRV_FILE FROM KU_FILE WHERE FILE_TBL_IDX = k.BOARD_IDX AND FILE_DEL_YN = "N" ORDER BY FILE_IDX ASC LIMIT 1) AS FIRST,
+			(select u.USR_NICKNAME from KU_USER as u where u.USR_EMAIL = k.BOARD_WRITER  ) as USR_NICKNAME,
+			(select COUNT(*) from KU_REPLY as r where r.BOARD_IDX = k.BOARD_IDX and r.BOARD_DETAILNAME = #boardDetailname# ) as REPLY_NUM,
+			(select COUNT(*) from KU_BOARDLIKE as kb2 where kb2.BOARD_IDX = k.BOARD_IDX and kb2.BOARD_DETAILNAME = #boardDetailname# ) AS LIKE_NUM
+		FROM 
+			KU_BOARD AS k
+		WHERE
+			BOARD_DETAILNAME = #boardDetailname#
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="boardTitle">
+				k.BOARD_TITLE LIKE CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="boardContent">
+				k.BOARD_CONTENT LIKE CONCAT('%', #searchKeyword#, '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="All">
+				k.BOARD_IDX IN((SELECT BOARD_IDX FROM KU_BOARD
+								WHERE
+									k.BOARD_CONTENT LIKE CONCAT('%', #searchKeyword#, '%')
+								OR
+									k.BOARD_TITLE LIKE CONCAT('%', #searchKeyword# , '%')))
+			</isEqual>
+		</isNotEmpty>
+		AND
+			NOT BOARD_STATUS = '0'
+		ORDER BY k.BOARD_IDX DESC
+		LIMIT 
+			#firstIndex#,#pageUnit#
+	</select>
+	
+	<select id="majorNoticeDAO.selectBoardListCnt" resultClass="int">
+		SELECT
+			COUNT(*)
+		FROM
+			KU_BOARD AS k
+		WHERE
+			BOARD_DETAILNAME = #boardDetailname#
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="boardTitle">
+				k.BOARD_TITLE LIKE CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="boardContent">
+				k.BOARD_CONTENT LIKE CONCAT('%', #searchKeyword#, '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="All">
+				k.BOARD_IDX IN((SELECT BOARD_IDX FROM KU_BOARD
+								WHERE
+									k.BOARD_CONTENT LIKE CONCAT('%', #searchKeyword#, '%')
+								OR
+									k.BOARD_TITLE LIKE CONCAT('%', #searchKeyword# , '%')))
+			</isEqual>
+		</isNotEmpty>
+		AND
+			NOT BOARD_STATUS = '0'
+	</select>
+	
+	<select id="majorNoticeDAO.selectBoardByIdx" resultClass="egovMap">
+		SELECT 
+			*,
+			(SELECT COUNT(*) FROM kku_app.KU_LIKE WHERE BOARD_IDX = k.BOARD_IDX) AS LIKE_CNT,
+			(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_IDX = k.BOARD_IDX AND FILE_DEL_YN = "N") AS FILE_CNT,
+			(SELECT FILE_SRV_FILE FROM KU_FILE WHERE FILE_TBL_IDX = k.BOARD_IDX AND FILE_DEL_YN = "N" ORDER BY FILE_IDX ASC LIMIT 1) AS FIRST,
+			(select u.USR_NICKNAME from KU_USER as u where u.USR_EMAIL = k.BOARD_WRITER  ) as USR_NICKNAME,
+			(select COUNT(*) from KU_REPLY as r where r.BOARD_IDX = k.BOARD_IDX and r.BOARD_DETAILNAME = #boardDetailname# ) as REPLY_NUM,
+			(select COUNT(*) from KU_BOARDLIKE as kb2 where kb2.BOARD_IDX = k.BOARD_IDX and kb2.BOARD_DETAILNAME = #boardDetailname# ) AS LIKE_NUM
+		FROM
+			KU_BOARD AS k
+		WHERE
+			k.board_IDX = #boardIdx#
+	</select>
+	
+	<select id="majorNoticeDAO.selectBoardFileList" resultClass="egovMap">
+		SELECT 
+			*
+		FROM
+			KU_FILE
+		WHERE
+			FILE_TBL_IDX = #boardIdx#
+		AND
+			FILE_TBL_CODE = 0
+		AND
+			FILE_DEL_YN = 'N'
+	</select>
+	
+	<update id="majorNoticeDAO.updateBoard">
+		UPDATE 
+			KU_BOARD
+	    SET
+			BOARD_TITLE = #boardTitle#,
+			BOARD_CONTENT = #boardContent#,
+			BOARD_WRITEDATE = NOW()
+		WHERE
+			BOARD_IDX = #boardIdx#
+	</update>
+	
+	<insert id="majorNoticeDAO.insertBoard">
+		INSERT INTO KU_BOARD (
+		    BOARD_WRITER,
+		    BOARD_TITLE,
+		    BOARD_CONTENT,
+		    BOARD_WRITEDATE,
+		    BOARD_NAME,
+		    BOARD_DETAILNAME,
+		    BOARD_VIEWNUM,
+		    BOARD_STATUS    
+		) VALUES (
+		    #boardWriter#,
+		    #boardTitle#,
+		    #boardContent#,
+		    NOW(),
+		    'Mboard',
+		    #boardDetailname#,
+		    '0',
+		    '1'
+		)
+		<selectKey keyProperty="boardIdx" resultClass="String">
+			SELECT @@IDENTITY
+		</selectKey>
+	</insert>
+	
+	<update id="majorNoticeDAO.deleteBoard">
+		UPDATE 
+			KU_BOARD
+	    SET
+			BOARD_STATUS   = '0'
+		WHERE
+			BOARD_IDX = #boardIdx#
+	</update>
+	
+	<update id="majorNoticeDAO.doneBoard">
+		UPDATE 
+			KU_BOARD
+	    SET
+			BOARD_STATUS   = '2'
+		WHERE
+			BOARD_IDX = #boardIdx#
+	</update>
+	
+	<insert id="majorNoticeDAO.insertBoardFile">
+		INSERT INTO KU_FILE(
+		    FILE_TBL_IDX,
+		    FILE_TBL_CODE,
+		    FILE_USR_FILE,
+		    FILE_SRV_FILE,
+		    FILE_DEL_YN,
+		    FILE_REG_IDX,
+		    FILE_REG_NICK,
+		    FILE_MOD_DATE,
+		    BF_TYPE
+		) VALUES (
+			#fileTblIdx#,
+			0,
+		    #fileUsrFile#,
+		    #fileSrvFile#,
+		    'N',
+		    #fileRegIdx#,
+		    #fileRegNick#,
+			NOW(),
+			#bfType#
+		)
+	</insert>
+	
+	<update id="majorNoticeDAO.deleteBoardFile">
+		UPDATE 
+			KU_FILE
+	    SET
+			FILE_DEL_YN = 'Y',
+			MOD_IDX  = #modIdx#,
+			MOD_NAME = #modName#,
+			FILE_MOD_DATE = NOW()
+		WHERE
+			FILE_IDX = #fileIdx#
+	</update>
+	
+	<update id="majorNoticeDAO.updateViewCnt">
+	    UPDATE 
+	    	KU_BOARD
+	    SET
+	    	BOARD_VIEWNUM = BOARD_VIEWNUM + 1
+	    WHERE
+	    	BOARD_IDX= #boardIdx# AND BOARD_DETAILNAME = #boardDetailname#
+	    
+	</update>
+	
+</sqlMap>

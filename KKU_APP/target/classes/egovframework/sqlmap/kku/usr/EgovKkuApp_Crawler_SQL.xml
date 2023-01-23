@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="crawlerDAO">
+	<typeAlias alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  	<typeAlias alias="crawlerVO" type="egovframework.kku.usr.service.EgovKkuAppCommunityCrawlerVO"/>
+
+	<insert id="crawlerDAO.insertContent" >
+		INSERT INTO KU_CRAWLER (
+		    CRAWLER_CONTENT,
+		    CRAWLER_CATEGORY,
+		    CRAWLER_UPDATED
+		) VALUES (
+		    #crawlerContent#,
+		    #crawlerCategory#,
+			NOW()
+		)
+	</insert>
+	
+	<select id="crawlerDAO.selectContent" resultClass="EgovMap">
+		SELECT 
+			CRAWLER_CONTENT, CRAWLER_UPDATED
+		FROM 
+			KU_CRAWLER 
+		WHERE 
+			CRAWLER_CATEGORY = #crawlerCategory# 
+		ORDER BY CRAWLER_UPDATED DESC LIMIT 1
+	</select>
+	
+	<insert id="crawlerDAO.insertWeeklyMenu">
+		INSERT INTO KU_WEEKLYMENU (
+			WEEKMENU_CATEGORY,
+			WEEKMENU_DAY,
+			WEEKMENU_MENU,
+			WEEKMENU_CALORY,
+			WEEKMENU_PLACE,
+			WEEKMENU_DATE,
+			WEEKMENU_UPDATED
+		) VALUES (
+			#weekmenuCategory#,
+			#weekmenuDay#,
+			#weekmenuMenu#,
+			#weekmenuCalory#,
+			#weekmenuPlace#,
+			#weekmenuDate#,
+			NOW()
+		)
+	</insert>
+	
+	<update id="crawlerDAO.updateNoticeViewcnt">
+		UPDATE
+			KU_SCHOOLNOTICE
+		SET
+			NOTICE_VIEWCNT = NOTICE_VIEWCNT+1
+		WHERE
+			NOTICE_IDX = #noticeIdx#
+	</update>
+	
+	<update id="crawlerDAO.updateMNoticeViewcnt">
+		UPDATE
+			KU_MAJORNOTICE
+		SET
+			MNOTICE_VIEWCNT = MNOTICE_VIEWCNT+1
+		WHERE
+			MNOTICE_IDX = #noticeIdx#
+	</update>
+	
+	<select id="crawlerDAO.selectMenuList" resultClass="EgovMap">
+		SELECT 
+			*,
+			REPLACE(WEEKMENU_MENU, char(10), '<![CDATA[<br>]]>') AS menuList
+		FROM 
+			KU_WEEKLYMENU
+		WHERE 
+			WEEKMENU_PLACE = #weekmenuPlace#
+		AND
+			WEEKMENU_DATE = #weekmenuDate# 
+		ORDER BY WEEKMENU_IDX ASC
+	</select>
+	
+	<insert id="crawlerDAO.insertNotice">
+		INSERT INTO KU_SCHOOLNOTICE (
+			NOTICE_NUM,
+			NOTICE_TITLE,
+			NOTICE_CONTENT,
+			NOTICE_NAME,
+			NOTICE_DATE,
+			NOTICE_CATEGORY,
+			NOTICE_FILES,
+			NOTICE_UPDATED
+		) VALUES (
+			#noticeNum#,
+			#noticeTitle#,
+			#noticeContent#,
+			#noticeName#,
+			#noticeDate#,
+			#noticeCategory#,
+			#noticeFiles#,
+			NOW()
+		)
+	</insert>
+	
+	<select id="crawlerDAO.selectNoticeList" resultClass="EgovMap">
+		SELECT NOTICE_NUM,
+			NOTICE_IDX,
+			NOTICE_TITLE,
+			NOTICE_NAME,
+			NOTICE_DATE,
+			NOTICE_CATEGORY,
+			NOTICE_VIEWCNT
+		FROM 
+			KU_SCHOOLNOTICE 
+			WHERE 1 = 1
+		<isNotEmpty property="noticeCategory" prepend="AND">
+			NOTICE_CATEGORY = #noticeCategory#
+		</isNotEmpty>
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="">
+				(
+					NOTICE_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+					OR
+					NOTICE_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+					OR
+					NOTICE_NAME LIKE  CONCAT('%', #searchKeyword# , '%')
+				)
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="title">
+				NOTICE_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="contents">
+				NOTICE_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+				<isEqual prepend="AND" property="searchCondition" compareValue="writer">
+				NOTICE_NAME LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+		 </isNotEmpty>
+		 GROUP BY NOTICE_NUM 
+		 ORDER BY NOTICE_DATE DESC, NOTICE_NUM DESC
+		 LIMIT
+		 	#firstIndex#,#pageUnit#
+	</select>
+	
+	<select id="crawlerDAO.selectNoticeListCnt" resultClass="int">
+		SELECT count(DISTINCT NOTICE_NUM)
+		FROM 
+			KU_SCHOOLNOTICE 
+			WHERE 1 = 1
+		<isNotEmpty property="noticeCategory" prepend="AND">
+			NOTICE_CATEGORY = #noticeCategory#
+		</isNotEmpty>
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="">
+				(
+					NOTICE_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+					OR
+					NOTICE_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+					OR
+					NOTICE_NAME LIKE  CONCAT('%', #searchKeyword# , '%')
+				)
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="title">
+			NOTICE_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="contents">
+				NOTICE_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+				<isEqual prepend="AND" property="searchCondition" compareValue="writer">
+				NOTICE_NAME LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+		 </isNotEmpty>
+	</select>
+	
+	<select id="crawlerDAO.selectMajorNoticeList" resultClass="EgovMap">
+		SELECT MNOTICE_NUM,
+			MNOTICE_IDX,
+			MNOTICE_TITLE,
+			MNOTICE_NAME,
+			MNOTICE_DATE,
+			MNOTICE_CATEGORY,
+			MNOTICE_VIEWCNT
+		FROM 
+			KU_MAJORNOTICE 
+		WHERE
+			MNOTICE_CATEGORY = #noticeCategory#
+	 	<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="">
+				(
+					MNOTICE_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+					OR
+					MNOTICE_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+					OR
+					MNOTICE_NAME LIKE  CONCAT('%', #searchKeyword# , '%')
+				)
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="title">
+				MNOTICE_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="contents">
+				MNOTICE_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="writer">
+				MNOTICE_NAME LIKE  CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+		 </isNotEmpty>
+		 GROUP BY MNOTICE_NUM 
+		 ORDER BY MNOTICE_DATE DESC, MNOTICE_NUM DESC
+		 limit
+		 	#firstIndex#,#pageUnit#
+	</select>
+	
+	<select id="crawlerDAO.selectMajorNoticeListCnt" resultClass="int">
+		SELECT count(DISTINCT MNOTICE_NUM)
+		FROM 
+			KU_MAJORNOTICE 
+		WHERE
+			MNOTICE_CATEGORY = #noticeCategory#
+			<isNotEmpty property="searchKeyword">
+				<isEqual prepend="AND" property="searchCondition" compareValue="">
+					(
+						MNOTICE_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+						OR
+						MNOTICE_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+						OR
+						MNOTICE_NAME LIKE  CONCAT('%', #searchKeyword# , '%')
+					)
+				</isEqual>
+				<isEqual prepend="AND" property="searchCondition" compareValue="title">
+					MNOTICE_TITLE LIKE  CONCAT('%', #searchKeyword# , '%')
+				</isEqual>
+				<isEqual prepend="AND" property="searchCondition" compareValue="contents">
+					MNOTICE_CONTENT LIKE  CONCAT('%', #searchKeyword# , '%')
+				</isEqual>
+				<isEqual prepend="AND" property="searchCondition" compareValue="writer">
+					MNOTICE_NAME LIKE  CONCAT('%', #searchKeyword# , '%')
+				</isEqual>
+		 	</isNotEmpty>
+	</select>
+	
+	<select id="crawlerDAO.selectNoticeByNum" resultClass="EgovMap">
+		SELECT 
+			*, 
+			REPLACE(NOTICE_CONTENT, 'src="/', 'src="https://www.kku.ac.kr/') AS kc,
+			REPLACE(NOTICE_FILES, 'href="/', 'href="https://www.kku.ac.kr/') AS kf
+		FROM 
+			KU_SCHOOLNOTICE 
+		WHERE
+			NOTICE_IDX = #noticeIdx#
+		ORDER BY NOTICE_UPDATED DESC LIMIT 1
+	</select>
+	
+	<select id="crawlerDAO.selectMajorNoticeByNum" resultClass="EgovMap">
+		SELECT 
+			*, 
+			REPLACE(REPLACE(MNOTICE_CONTENT, 'src="/', #srcUrl#), 'href="/', #hrefUrl#) AS kc,
+			REPLACE(MNOTICE_FILES, 'href="/', #hrefUrl#) AS kf
+		FROM 
+			KU_MAJORNOTICE 
+		WHERE
+			MNOTICE_IDX = #noticeIdx#
+		ORDER BY MNOTICE_UPDATED DESC LIMIT 1
+	</select>
+	
+	<select id="crawlerDAO.selectIndexList" resultClass="String">
+		SELECT DISTINCT NOTICE_NUM
+		FROM 
+			KU_SCHOOLNOTICE 
+		WHERE
+			NOTICE_CATEGORY = #noticeCategory#
+		ORDER BY NOTICE_NUM DESC, NOTICE_NUM DESC
+	</select>
+	
+	<select id="crawlerDAO.selectIndexListMN" resultClass="String">
+		SELECT DISTINCT	MNOTICE_NUM
+		FROM 
+			KU_MAJORNOTICE 
+		WHERE
+			MNOTICE_CATEGORY = #noticeCategory#
+		ORDER BY MNOTICE_NUM DESC, MNOTICE_NUM DESC
+	</select>
+	
+	<insert id="crawlerDAO.insertMajorNotice">
+		INSERT INTO KU_MAJORNOTICE (
+			MNOTICE_NUM,
+			MNOTICE_TITLE,
+			MNOTICE_CONTENT,
+			MNOTICE_NAME,
+			MNOTICE_DATE,
+			MNOTICE_CATEGORY,
+			MNOTICE_FILES,
+			MNOTICE_UPDATED
+		) VALUES (
+			#noticeNum#,
+			#noticeTitle#,
+			#noticeContent#,
+			#noticeName#,
+			#noticeDate#,
+			#noticeCategory#,
+			#noticeFiles#,
+			NOW()
+		)
+	</insert>
+	
+	<select id="crawlerDAO.selectRecentUpdated" resultClass="String">
+		SELECT
+			CRAWLER_CONTENT
+		FROM
+			KU_CRAWLER
+		WHERE
+			CRAWLER_CATEGORY = "update"
+		ORDER BY
+			CRAWLER_UPDATED DESC
+		LIMIT 1
+	</select>
+	
+	<select id="crawlerDAO.selectRecentUpdateDate" resultClass="String">
+	    SELECT 
+	    	ks.NOTICE_UPDATED 
+		from 
+			KU_SCHOOLNOTICE ks 
+		order by 
+			NOTICE_UPDATED desc
+		limit 1
+	</select>
+	<select id="crawlerDAO.selectMajorNoticeUpdateDate" resultClass="String">
+	    SELECT km.MNOTICE_UPDATED 
+		from KU_MAJORNOTICE km 
+		where MNOTICE_CATEGORY = #usrMajor#
+		order by km.MNOTICE_UPDATED  desc
+		limit 1
+	</select>
+</sqlMap>

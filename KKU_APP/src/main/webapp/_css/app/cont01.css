@@ -1,0 +1,25 @@
+/* 생산성본부 소개 */
+div.establish .w_box03		{width: 100%; background: #fff; padding: 20px 15px; box-sizing: border-box;}
+div.establish h2.s_tit		{font: 700 16px/20px "NotoSansKR" , "MalgunGothic" , "Arial";	color: #333;	padding: 0;	box-sizing: border-box;	text-align: left;	margin: 0px 0 0px;}
+div.establish .mt20			{margin-top: 20px;}
+div.establish .s_text		{font: 300 15px/24px "NotoSansKR" , "MalgunGothic" , "Arial";	color: #333;}
+
+div.establish div.info_est								{margin-top: 30px;	padding: 10px 20px;	box-sizing: border-box; border: 1px solid #ddd;}
+div.establish div.info_est dl							{border-bottom: 1px dashed #ddd;	padding: 15px 0;}
+div.establish div.info_est dt							{font: 500 16px/20px "NotoSansKR",Malgun Gothic, Dotum, Arial, verdana, Helvetica;	color: #ee2c49;}
+div.establish div.info_est dd							{font: 500 15px/21px "NotoSansKR",Malgun Gothic, Dotum, Arial, verdana, Helvetica;	color: #333;}
+div.establish div.info_est dl:last-child				{border-bottom: 0;}
+
+
+/* 플랫폼 소개 */
+div.platform .w_box03						{width: 100%; background: #fff; padding: 20px 15px 40px 15px; box-sizing: border-box;}
+div.platform .s_text						{font: 300 15px/24px "NotoSansKR" , "MalgunGothic" , "Arial";	color: #333;}
+div.platform h2.s_tit						{text-align: left;	margin: 0px 0 0px; color: #808285;}
+
+div.platform p.str							{padding: 30px 20px;	box-sizing: border-box; border: 1px solid #ddd;}
+
+div.platform div.kpc_ceo					{text-align: center;	position: relative;	padding-top: 50px;}
+div.platform div.kpc_ceo::before			{content: ''; display: block; width: 100%; height: 30px; position: absolute; top: 25px; left: 0; background: url(/_img/cont/kpcpr.png)no-repeat 50% 0 / 19px;}
+div.platform div.kpc_ceo p.t01				{font: 300 16px/20px "NotoSansKR",Malgun Gothic, Dotum, Arial, verdana, Helvetica; color: #333;}
+div.platform div.kpc_ceo p.t01 img			{vertical-align: bottom;}
+div.platform div.kpc_ceo p.t02 span			{font: 700 16px/20px "NotoSansKR",Malgun Gothic, Dotum, Arial, verdana, Helvetica; color: #333;}

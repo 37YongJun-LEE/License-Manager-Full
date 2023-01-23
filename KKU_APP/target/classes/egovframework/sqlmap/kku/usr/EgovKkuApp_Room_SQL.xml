@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="roomDAO">
+	<typeAlias alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  	<typeAlias alias="roomVO" type="egovframework.kku.usr.service.EgovKkuAppCommunitySchoolInfoRoomVO"/>
+	
+	<select id="roomDAO.selectBoardList" resultClass="egovMap">
+		SELECT 
+			*,
+			(SELECT COUNT(*) FROM KU_FILE WHERE FILE_TBL_IDX = k.ROOM_IDX AND FILE_DEL_YN = "N") AS FILE_CNT,
+			(SELECT FILE_SRV_FILE FROM KU_FILE WHERE FILE_TBL_IDX = k.ROOM_IDX AND FILE_DEL_YN = "N" ORDER BY FILE_IDX ASC LIMIT 1) AS FIRST
+		FROM 
+			KU_ROOM AS k
+		<isNotEmpty property="roomLocation">
+		WHERE
+			k.ROOM_LOCATION = #roomLocation#
+		</isNotEmpty>
+		<isNotEmpty property="searchKeyword">
+		WHERE
+			k.ROOM_NAME LIKE CONCAT('%', #searchKeyword# , '%')
+		</isNotEmpty>
+		ORDER BY k.ROOM_IDX DESC
+		LIMIT 
+			#firstIndex#,#pageUnit#
+	</select>
+
+	<select id="roomDAO.selectBoardListCnt" resultClass="int">
+		SELECT
+			COUNT(*)
+		FROM
+			KU_ROOM
+		<isNotEmpty property="roomLocation">
+		WHERE
+			ROOM_LOCATION = #roomLocation#
+		</isNotEmpty>
+		<isNotEmpty property="searchKeyword">
+		WHERE
+			ROOM_NAME LIKE CONCAT('%', #searchKeyword# , '%')
+		</isNotEmpty>
+	</select>
+	
+	<select id="roomDAO.selectBoardByIdx" resultClass="egovMap">
+		SELECT 
+			* 
+		FROM
+			KU_ROOM AS k
+		WHERE
+			k.ROOM_IDX = #roomIdx#
+	</select>
+	
+	<select id="roomDAO.roomFileList" resultClass="egovMap">
+		SELECT 
+			*
+		FROM
+			KU_FILE
+		WHERE
+			FILE_TBL_IDX = #roomIdx#
+		AND
+			FILE_TBL_CODE = 0
+		AND
+			FILE_DEL_YN = 'N'
+	</select>	
+	
+</sqlMap>

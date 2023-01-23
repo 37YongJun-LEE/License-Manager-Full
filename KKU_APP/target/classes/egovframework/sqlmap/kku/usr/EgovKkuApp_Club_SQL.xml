@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="clubDAO">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  	<typeAlias  alias="clubVO" type="egovframework.kku.usr.service.EgovKkuAppClubVO"/>
+  	
+ 	<resultMap id="clubInfoMap" class="egovframework.kku.usr.service.EgovKkuAppClubVO">
+		<result property="clubIdx" column="CLUB_IDX"/>
+		<result property="clubCategory" column="CLUB_CATEGORY"/>
+		<result property="clubName" column="CLUB_NAME"/>
+		<result property="clubComment" column="CLUB_COMMENT"/>
+		<result property="clubEvent" column="CLUB_EVENT"/>
+		<result property="userNum" column="USER_NUM"/>
+	</resultMap>	 
+	
+	<select id="clubDAO.selectClubList" resultClass="EgovMap">
+		SELECT 
+			*
+		FROM 
+			KU_CLUB kc
+		<!-- <isEqual property="clubCategory" compareValue="all"> -->
+		   	left outer join 
+			KU_CLUB_USER kcu 
+			on kc.CLUB_IDX = kcu.CLUB_IDX 
+			and kcu.USR_IDX = #usrIdx#
+<!-- 		</isEqual> -->
+		<isNotEqual property="clubCategory" compareValue="all">
+			WHERE
+				CLUB_CATEGORY = #clubCategory#
+		</isNotEqual>
+		ORDER BY  kc.CLUB_IDX DESC
+		LIMIT 
+			#firstIndex#,#pageUnit#
+	</select>
+	
+	<select id="clubDAO.selectClubListCnt" resultClass="java.lang.Integer">
+		SELECT 
+			COUNT(*)
+		FROM 
+			KU_CLUB
+		<isNotEqual property="clubCategory" compareValue="all">
+			WHERE
+				CLUB_CATEGORY = #clubCategory#
+		</isNotEqual>
+	</select>
+	
+	<select id="clubDAO.selectClubDetail" parameterClass="clubVO"  resultMap="clubInfoMap">
+	     <![CDATA[ SELECT 
+	    	*,
+	    	(select COUNT(*) from KU_CLUB_USER kcu 
+	    		where 
+	    			kcu.CLUB_IDX = #clubIdx# 
+	    	and 
+	    		kcu.DEL_YN ="N" 
+	    	and 
+	    		kcu.CLUB_USER_STATE = 3
+	    	AND
+	    		kcu.CLUB_USER_LEV >= 0
+	    		) as USER_NUM
+	    FROM 
+	    	KU_CLUB
+	    WHERE 
+	    	CLUB_IDX = #clubIdx#
+								]]>
+	</select>
+	
+	<insert id="clubDAO.insertClubApplication">
+	    
+	    INSERT INTO
+	    	KU_CLUB_USER (
+	    	CLUB_IDX,
+	    	USR_IDX,
+	    	CLUB_USER_MSG,
+	    	CLUB_USER_PHONE,
+	    	CLUB_USER_LEV,
+	    	CLUB_USER_STATE,
+	    	DEL_YN,	    	
+	    	AGREE_YN,
+	    	REG_DATE    	
+	    	)
+	    VALUES(
+	    #clubIdx#,
+	    #usrIdx#,
+	    #clubUserMsg#,
+	    #clubUserPhone#,
+	    #clubUserLev#,
+	    #clubUserState#,
+	    #delYn#,
+	    #agreeYn#,
+	    sysdate()
+	    )
+	    	
+	</insert>
+	
+	<select id="clubDAO.selectClubUserInfo" resultClass="egovMap">
+	    SELECT
+	    	*
+	    FROM
+	    	KU_CLUB_USER AS kcu
+	    WHERE 
+	    	kcu.CLUB_IDX = #clubIdx# and kcu.USR_IDX = #usrIdx#
+	    
+	</select>
+	<select id="clubDAO.selectClubViewDetail" resultClass="egovMap">
+	     select 
+	    	*
+		from
+			((select * ,(SELECT kf.FILE_SRV_FILE FROM KU_FILE kf where kf.FILE_TBL_CODE = 8 and kf.FILE_TBL_IDX = kcb.CLUB_BOARD_IDX and kf.FILE_DEL_YN = 'N') as SERV_FILE
+				from 
+					KU_CLUB_BOARD kcb inner join KU_USER ku 
+					on kcb.REG_IDX = ku.USR_IDX 
+				where 
+					kcb.CLUB_IDX = #clubIdx# and kcb.CLUB_BOARD_TYPE = 'NOTICE'  and kcb.DEL_YN = 'N' LIMIT 3)	
+	    <isEqual property="category" compareValue="board">
+	        <isNotEmpty prepend="" property="category">
+	            union
+					(select 
+						* ,(SELECT kf.FILE_SRV_FILE FROM KU_FILE kf where kf.FILE_TBL_CODE = 8 and kf.FILE_TBL_IDX = kcb.CLUB_BOARD_IDX  and kf.FILE_DEL_YN = 'N' ) as SERV_FILE
+						from 
+						KU_CLUB_BOARD kcb inner join KU_USER ku 
+					on kcb.REG_IDX = ku.USR_IDX 
+					where 
+						kcb.CLUB_IDX = #clubIdx# and kcb.CLUB_BOARD_TYPE = 'BOARD' and kcb.DEL_YN = 'N' LIMIT 4)
+					) as results
+						order by REG_DATE desc
+	        </isNotEmpty>
+		</isEqual>
+		<isEqual property="category" compareValue="gal">
+			<isNotEmpty prepend="" property="category">
+					union
+					(select 
+						* ,(SELECT kf.FILE_SRV_FILE FROM KU_FILE kf where kf.FILE_TBL_CODE = 8 and kf.FILE_TBL_IDX = kcb.CLUB_BOARD_IDX and kf.FILE_DEL_YN = 'N') as SERV_FILE
+					from 
+						KU_CLUB_BOARD kcb inner join KU_USER ku 
+					on kcb.REG_IDX = ku.USR_IDX 
+					where 
+						kcb.CLUB_IDX = #clubIdx# and kcb.CLUB_BOARD_TYPE = 'GALLERY' and kcb.DEL_YN = 'N' LIMIT 4)
+					) as results
+						order by REG_DATE desc
+	        </isNotEmpty>
+		</isEqual>
+	</select>
+	
+	<insert id="clubDAO.insertClubNotice">
+	    INSERT INTO 
+	    	KU_CLUB_BOARD(CLUB_BOARD_TYPE, CLUB_IDX, CLUB_BOARD_CONTENT, VIEWNUM, REG_IDX, REG_DATE, DEL_YN)
+	    	VALUES(#clubBoardType#,#clubIdx#,#clubBoardContent#,#viewnum#,#regIdx#,sysdate(),'N')
+	</insert>
+	<select id="clubDAO.selectClubApplicationList" resultClass="egovMap">
+	       select 
+	    	*,DATE_FORMAT(kcu.REG_DATE,'%Y-%m-%d')  as NREG_DATE 
+	    	,SUBSTRING(ku.USR_STDNUM , 3, 2) as NUSR_STDNUM
+		from 
+			KU_CLUB_USER kcu inner join KU_USER ku
+		on
+			kcu.USR_IDX = ku.USR_IDX 
+		where 
+			kcu.CLUB_IDX = #clubIdx# and kcu.CLUB_USER_STATE = #clubUserState#
+		ORDER by 
+			kcu.REG_DATE desc
+	</select>
+	<select id="clubDAO.selectClubApplicationDetail" resultClass="egovMap">
+	       select 
+	    	*,DATE_FORMAT(kcu.REG_DATE,'%Y-%m-%d')  as NREG_DATE 
+	    	,SUBSTRING(ku.USR_STDNUM , 3, 2) as NUSR_STDNUM
+		from 
+			KU_CLUB_USER kcu inner join KU_USER ku
+		on
+			kcu.USR_IDX = ku.USR_IDX 
+		where 
+			kcu.CLUB_IDX = #clubIdx# and kcu.USR_IDX = #usrIdx#
+
+	</select>
+	<update id="clubDAO.updateClubUserState">
+	    UPDATE
+	    	KU_CLUB_USER
+	    SET CLUB_USER_STATE = #clubUserState# 
+	    <isNotEmpty prepend="," property="clubUserLev">
+	       <!--   <isEqual property="clubUserLev" compareValue="-1">
+	            CLUB_USER_LEV = #clubUserLev#,
+	            DEL_YN = #delYn#,
+	            MOD_DATE = sysdate(),
+	            MOD_IDX = #modIdx#
+	        </isEqual> -->
+	        <isEqual property="clubUserLev" compareValue="0">
+	            CLUB_USER_LEV = #clubUserLev#,
+	            MOD_DATE = sysdate(),
+	            MOD_IDX = #modIdx#
+	        </isEqual>
+			<isEqual property="clubUserLev" compareValue="1">
+	            CLUB_USER_LEV = #clubUserLev#,
+	            MOD_DATE = sysdate(),
+	            MOD_IDX = #modIdx#
+	        </isEqual>
+	        <isEqual property="clubUserLev" compareValue="2">
+	            CLUB_USER_LEV = #clubUserLev#,
+	            MOD_DATE = sysdate(),
+	            MOD_IDX = #modIdx#
+	        </isEqual>		
+	   </isNotEmpty> 
+	   WHERE
+	   		CLUB_IDX = #clubIdx# AND USR_IDX = #usrIdx#
+	    
+	</update>
+	<delete id="clubDAO.deletUser">
+	    delete
+	    	from KU_CLUB_USER
+	    where
+	    	club_idx = #clubIdx#
+	    and
+	    	usr_idx = #usrIdx#
+	</delete>
+	
+	<select id="clubDAO.selectClubUserDevice" resultClass="egovMap">
+	    select  
+	  		(select kd.REGISTRATION_ID  
+	  			from KU_DEVICE kd where kd.DEVICE_ID = (select ku.DEVICE_ID from KU_USER ku where ku.USR_IDX = kcu.USR_IDX) ) AS REGISTRATION_ID,
+			(select kd.OS  
+				from KU_DEVICE kd where kd.DEVICE_ID = (select ku.DEVICE_ID from KU_USER ku where ku.USR_IDX = kcu.USR_IDX) )  AS OS
+	  	from 
+	  		KU_CLUB_USER kcu 
+	  	where 
+	  		kcu.CLUB_IDX = #clubIdx# and kcu.CLUB_USER_STATE = #clubUserState#
+	    
+	</select>
+	<insert id="clubDAO.insertClubContent">
+	    INSERT INTO 
+	    	KU_CLUB_BOARD
+	   	 	(CLUB_BOARD_TYPE, CLUB_IDX, CLUB_BOARD_TITLE, CLUB_BOARD_CONTENT, VIEWNUM,REG_IDX, REG_DATE, DEL_YN)
+	   	 VALUES
+	   	 	(#clubBoardType#,#clubIdx#,#clubBoardTitle#,#clubBoardContent#,#viewnum#,#regIdx#,sysdate(),'N')
+	   	<selectKey keyProperty="clubBoardIdx" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY
+		</selectKey>	
+	</insert>
+	<select id="clubDAO.selectClubGalleryList" resultClass="egovMap">
+	    SELECT 
+	    	* ,
+	    	(select kf.FILE_SRV_FILE from KU_FILE kf where kf.FILE_TBL_CODE = #fileTblCode# and kf.FILE_TBL_IDX=kcb.CLUB_BOARD_IDX and kf.FILE_DEL_YN = 'N') as SERV_FILE
+		FROM 
+			KU_CLUB_BOARD kcb 
+				inner join KU_USER ku 
+		on 
+			kcb.REG_IDX = ku.USR_IDX 
+		WHERE 
+			CLUB_IDX = #clubIdx#
+			AND kcb.CLUB_BOARD_TYPE= #clubBoardType# 
+			AND kcb.DEL_YN = 'N'
+		ORDER BY kcb.CLUB_BOARD_IDX DESC
+		LIMIT 
+			#firstIndex#,#pageUnit#
+
+
+	</select>
+	
+	
+	<select id="clubDAO.selectClubGalleryCnt" resultClass="java.lang.Integer"> 
+	    SELECT COUNT(*)
+	    FROM KU_CLUB_BOARD
+	    WHERE 
+	    	CLUB_IDX = #clubIdx# 
+	    	and 
+	    		DEL_YN = 'N'
+	    	AND
+	    		CLUB_BOARD_TYPE= #clubBoardType# 
+	   
+	</select>
+	
+	<select id="clubDAO.selectClubGalleryDetail" resultClass="egovMap">
+	    SELECT 
+	    	*,
+	    	(select kf.FILE_SRV_FILE from KU_FILE kf where kf.FILE_TBL_CODE = #fileTblCode# and kf.FILE_TBL_IDX=kcb.CLUB_BOARD_IDX and kf.FILE_DEL_YN = 'N') as SERV_FILE,
+	    	(select COUNT(*)  from KU_FILE kf where kf.FILE_TBL_CODE = #fileTblCode# and kf.FILE_TBL_IDX=kcb.CLUB_BOARD_IDX and kf.FILE_DEL_YN = 'N') as FILE_CNT,
+	    	(select kf.FILE_IDX  from KU_FILE kf where kf.FILE_TBL_CODE = #fileTblCode# and kf.FILE_TBL_IDX=kcb.CLUB_BOARD_IDX and kf.FILE_DEL_YN = 'N') as FILE_INDEX
+	    FROM
+	    	KU_CLUB_BOARD kcb
+	    INNER JOIN
+	    	KU_USER ku 
+	    on kcb.REG_IDX = ku.USR_IDX
+	    WHERE
+	   		CLUB_IDX = #clubIdx#
+		AND 
+			kcb.CLUB_BOARD_TYPE= #clubBoardType# 
+		AND 
+			CLUB_BOARD_IDX = #clubBoardIdx#
+	</select>
+	
+	<update id="clubDAO.updateClubBoardState">
+	    UPDATE
+	    	KU_CLUB_BOARD kcb
+	    SET
+	    	<isEqual property="delYn" compareValue="N">
+	           CLUB_BOARD_TITLE = #clubBoardTitle#,
+	           CLUB_BOARD_CONTENT = #clubBoardContent#,
+	           MOD_IDX = #modIdx#,
+	           MOD_DATE = sysdate()
+	        </isEqual>
+	        	<isEqual property="delYn" compareValue="Y">
+	           DEL_YN = #delYn#,
+	           MOD_IDX = #modIdx#,
+	           MOD_DATE = sysdate()
+	        </isEqual>
+	     WHERE
+	     	CLUB_IDX = #clubIdx#
+	     	AND CLUB_BOARD_IDX = #clubBoardIdx#
+	     	AND CLUB_BOARD_TYPE = #clubBoardType#
+	        
+	</update>
+</sqlMap>

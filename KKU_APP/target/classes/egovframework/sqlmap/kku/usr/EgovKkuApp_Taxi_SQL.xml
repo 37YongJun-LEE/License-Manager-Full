@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="taxiDAO">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  	<typeAlias  alias="taxiVO" type="egovframework.kku.usr.service.EgovKkuTaxiVO"/>
+  	
+	
+  	<insert id="taxiDAO.insertBoard">
+  		INSERT INTO KU_TAXI (
+  			TAXI_WRITERIDX,
+  			TAXI_WRITER,
+  			TAXI_WRITERGENDER,
+  			TAXI_DEPARTUREPLACE,
+  			TAXI_ARRIVALPLACE,
+  			TAXI_DEPARTURETIME,
+  			TAXI_MEMBERS,
+  			TAXI_GENDER,
+  			TAXI_REQUEST,
+  			TAXI_WRITEDATE
+  		) VALUES (
+  			#taxiWriteridx#,
+  			#taxiWriter#,
+  			#taxiWritergender#,
+  			#taxiDepartureplace#,
+  			#taxiArrivalplace#,
+  			#taxiDeparturetime#,
+  			#taxiMembers#,
+  			#taxiGender#,
+  			#taxiRequest#,
+  			NOW()
+  		)
+  		<selectKey keyProperty="taxiIdx" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY
+		</selectKey>
+	</insert>
+	
+	<select id="taxiDAO.selectBoardList" resultClass="EgovMap">
+		SELECT 
+			*,
+			(
+				CASE
+					WHEN k.TAXI_DEPARTURETIME LIKE '%오후%' THEN TIMESTAMPADD(HOUR,12,STR_TO_DATE(k.TAXI_DEPARTURETIME,'%Y년 %m월 %d일 오후%H시%i분'))
+					WHEN k.TAXI_DEPARTURETIME LIKE '%오전%' THEN STR_TO_DATE(k.TAXI_DEPARTURETIME,'%Y년 %m월 %d일 오전%H시%i분')
+				END 
+			)end_date
+		FROM 
+			KU_TAXI AS k
+		WHERE
+			(TAXI_STATE = 0 OR TAXI_STATE = 1)
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="departurePlace">
+				k.TAXI_DEPARTUREPLACE LIKE CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="arrivalPlace">
+				k.TAXI_ARRIVALPLACE LIKE CONCAT('%', #searchKeyword#, '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="All">
+				k.TAXI_DEPARTUREPLACE LIKE CONCAT('%',#searchKeyword#, '%')
+			OR 
+				k.TAXI_ARRIVALPLACE LIKE CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+		</isNotEmpty>
+		ORDER BY TAXI_IDX DESC
+		LIMIT 
+			#firstIndex#,#pageUnit#
+	</select>
+	
+	<select id="taxiDAO.selectBoardListCnt" resultClass="Integer">
+		SELECT 
+			COUNT(*)
+		FROM 
+			KU_TAXI AS k
+		WHERE
+			(TAXI_STATE = 0 OR TAXI_STATE = 1)
+		<isNotEmpty property="searchKeyword">
+			<isEqual prepend="AND" property="searchCondition" compareValue="departurePlace">
+				k.TAXI_DEPARTUREPLACE LIKE CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="arrivalPlace">
+				k.TAXI_ARRIVALPLACE LIKE CONCAT('%', #searchKeyword#, '%')
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="All">
+				k.TAXI_DEPARTUREPLACE LIKE CONCAT('%',#searchKeyword#, '%')
+			OR 
+				k.TAXI_ARRIVALPLACE LIKE CONCAT('%', #searchKeyword# , '%')
+			</isEqual>
+		</isNotEmpty>
+	</select>
+	
+	<select id="taxiDAO.selectBoard" resultClass="EgovMap">
+		SELECT 
+			*
+		FROM 
+			KU_TAXI
+		WHERE
+			TAXI_IDX = #taxiIdx#
+	</select>
+	
+	<select id="taxiDAO.selectUsrInfo" resultClass="EgovMap">
+		SELECT 
+			*
+		FROM 
+			KU_USER
+		WHERE
+			USR_IDX IN (SELECT TAXI_WRITERIDX FROM KU_TAXI WHERE TAXI_IDX = #taxiIdx#)
+	</select>
+	
+	<update id="taxiDAO.updateViewCnt">
+	    UPDATE 
+	    	KU_TAXI
+	    SET
+	    	TAXI_VIEWNUM = TAXI_VIEWNUM + 1
+	    WHERE
+	    	TAXI_IDX= #taxiIdx#
+	    
+	</update>
+	
+	<insert id="taxiDAO.insertApplicant">
+	    INSERT INTO	KU_TAXIAPPLICANT(
+	    	APPLICANT_TAXIIDX,
+	    	APPLICANT_USRIDX,
+	    	APPLICANT_USRNICKNAME
+	    ) VALUES (
+	    	#taxiIdx#,
+	    	#usrIdx#,
+	    	#usrNickname#
+	    )
+	</insert>
+	
+	<update id="taxiDAO.updateAppliedCnt">
+	    UPDATE 
+	    	KU_TAXI
+	    SET
+	    	TAXI_APPLIED = TAXI_APPLIED + 1
+	    WHERE
+	    	TAXI_IDX = #taxiIdx#
+	</update>
+	
+	<insert id="taxiDAO.deleteApplicant">
+		DELETE 
+		FROM 
+			KU_TAXIAPPLICANT
+		WHERE 
+			APPLICANT_TAXIIDX = #taxiIdx#
+		AND
+			APPLICANT_USRIDX = #usrIdx#
+	</insert>
+	
+	<update id="taxiDAO.deleteAppliedCnt">
+	    UPDATE 
+	    	KU_TAXI
+	    SET
+	    	TAXI_APPLIED = TAXI_APPLIED - 1
+	    WHERE
+	    	TAXI_IDX = #taxiIdx#
+	</update>
+	
+	<select id="taxiDAO.selectApplicantList" resultClass="EgovMap">
+						SELECT 
+			*,
+			(SELECT USR_SRVPROFILEPIC FROM KU_USER WHERE USR_IDX = kt.APPLICANT_USRIDX) AS profile
+		FROM  
+			KU_TAXIAPPLICANT as kt
+		WHERE
+			APPLICANT_TAXIIDX = #taxiIdx#
+	</select>
+	
+	<update id="taxiDAO.changeState">
+		UPDATE 
+	    	KU_TAXI
+	    SET
+	    	TAXI_STATE = 0
+	    WHERE
+	    	TAXI_IDX = #taxiIdx#
+	</update>
+	
+  	<insert id="taxiDAO.insertAlarm">
+  		INSERT INTO KU_TAXI_ALARM (
+  			USR_IDX,
+  			STARTPLACE,
+  			ARRIVE,
+  			START_TIME,
+  			END_TIME,
+  			REGI_TIME
+  		) VALUES (
+  			#usrIdx#,
+  			#startplace#,
+  			#arrive#,
+  			(
+  			CASE
+				WHEN #startTime# LIKE '%오후%' THEN TIMESTAMPADD(HOUR,12,STR_TO_DATE(#startTime#,'%Y년 %m월 %d일 오후%H시%i분'))
+				WHEN #startTime# LIKE '%오전%' THEN STR_TO_DATE(#startTime#,'%Y년 %m월 %d일 오전%H시%i분') 
+	   		END
+	   		),
+	   		(
+  			CASE
+				WHEN #endTime# LIKE '%오후%' THEN TIMESTAMPADD(HOUR,12,STR_TO_DATE(#endTime#,'%Y년 %m월 %d일 오후%H시%i분'))
+				WHEN #endTime# LIKE '%오전%' THEN STR_TO_DATE(#endTime#,'%Y년 %m월 %d일 오전%H시%i분') 
+	   		END
+	   		),
+  			NOW()
+  		)
+  		
+	</insert>
+
+	<select id="taxiDAO.selectAlarmList" resultClass="egovMap">
+		SELECT 
+			*
+		FROM
+			KU_TAXI_ALARM
+		WHERE
+			USR_IDX = #usrIdx#
+		order by REGI_TIME DESC 
+	</select>
+
+
+	<delete id="taxiDAO.deleteTaxiAlarm">
+		DELETE FROM 
+			KU_TAXI_ALARM
+		WHERE
+			ALARM_IDX = #alarmIdx# 
+	</delete>
+	
+	<select id="taxiDAO.taxipushAlarmList" resultClass="egovMap">
+	  	<![CDATA[ 
+	  	select 
+	  		(select kd.REGISTRATION_ID  
+	  			from KU_DEVICE kd where kd.DEVICE_ID = (select ku.DEVICE_ID from KU_USER ku where ku.USR_IDX = kta.USR_IDX) ) AS REGISTRATION_ID,
+			(select kd.OS  
+				from KU_DEVICE kd where kd.DEVICE_ID = (select ku.DEVICE_ID from KU_USER ku where ku.USR_IDX = kta.USR_IDX) )  AS OS
+	  	from 
+	  		KU_TAXI_ALARM kta
+	    where 
+	    	kta.STARTPLACE = (SELECT kt.TAXI_DEPARTUREPLACE from KU_TAXI kt where kt.TAXI_IDX = #taxiIdx#) 
+	    and 
+	    	kta.ARRIVE = (select kt.TAXI_ARRIVALPLACE  from KU_TAXI kt where kt.TAXI_IDX = #taxiIdx#) 
+	    and
+	    	kta.REGI_TIME < sysdate()
+		and 
+			(SELECT (
+				case 
+					when kt.TAXI_DEPARTURETIME LIKE '%오후%' THEN TIMESTAMPADD(HOUR,12,STR_TO_DATE(kt.TAXI_DEPARTURETIME,'%Y년 %m월 %d일 오후%H시%i분'))
+					when kt.TAXI_DEPARTURETIME LIKE '%오전%' THEN STR_TO_DATE(kt.TAXI_DEPARTURETIME,'%Y년 %m월 %d일 오전%H시%i분') 
+			   	end
+			)as TAXI_DEPARTURETIME from KU_TAXI kt where kt.TAXI_IDX = #taxiIdx#)
+			BETWEEN kta.START_TIME and kta.END_TIME  ]]>
+	</select>
+
+</sqlMap>
